@@ -1,56 +1,49 @@
-const { withFixtures, unlockWallet } = require('../helpers');
+const {
+  defaultGanacheOptions,
+  withFixtures,
+  unlockWallet,
+  switchToNotificationWindow,
+  WINDOW_TITLES,
+} = require('../helpers');
 const FixtureBuilder = require('../fixture-builder');
 const { TEST_SNAPS_WEBSITE_URL } = require('./enums');
 
 describe('Test Snap Lifecycle Hooks', function () {
   it('can run lifecycle hook on connect', async function () {
-    const ganacheOptions = {
-      accounts: [
-        {
-          secretKey:
-            '0x7C9529A67102755B7E6102D6D950AC5D5863C98713805CEC576B945B15B71EAC',
-          balance: 25000000000000000000,
-        },
-      ],
-    };
     await withFixtures(
       {
         fixtures: new FixtureBuilder().build(),
-        ganacheOptions,
-        failOnConsoleError: false,
+        ganacheOptions: defaultGanacheOptions,
         title: this.test.fullTitle(),
       },
       async ({ driver }) => {
         await unlockWallet(driver);
 
-        // navigate to test snaps page and connect
+        // navigate to test snaps page and connect to lifecycle-hooks snap
         await driver.openNewPage(TEST_SNAPS_WEBSITE_URL);
-        await driver.delay(1000);
+
+        // wait for page to load
+        await driver.waitForSelector({
+          text: 'Installed Snaps',
+          tag: 'h2',
+        });
+
         const snapButton = await driver.findElement('#connectlifecycle-hooks');
         await driver.scrollToElement(snapButton);
         await driver.delay(1000);
         await driver.clickElement('#connectlifecycle-hooks');
-        await driver.delay(1000);
 
         // switch to metamask extension and click connect
-        let windowHandles = await driver.waitUntilXWindowHandles(
-          3,
-          1000,
-          10000,
-        );
-        await driver.switchToWindowWithTitle(
-          'MetaMask Notification',
-          windowHandles,
-        );
+        await switchToNotificationWindow(driver);
         await driver.clickElement({
           text: 'Connect',
           tag: 'button',
         });
 
-        await driver.waitForSelector({ text: 'Install' });
+        await driver.waitForSelector({ text: 'Confirm' });
 
         await driver.clickElement({
-          text: 'Install',
+          text: 'Confirm',
           tag: 'button',
         });
 
@@ -62,7 +55,7 @@ describe('Test Snap Lifecycle Hooks', function () {
         });
 
         // click send inputs on test snap page
-        await driver.switchToWindowWithTitle('Test Snaps', windowHandles);
+        await driver.switchToWindowWithTitle(WINDOW_TITLES.TestSnaps);
 
         // wait for npm installation success
         await driver.waitForSelector({
@@ -71,12 +64,7 @@ describe('Test Snap Lifecycle Hooks', function () {
         });
 
         // switch to dialog popup
-        windowHandles = await driver.waitUntilXWindowHandles(3, 1000, 10000);
-        await driver.switchToWindowWithTitle(
-          'MetaMask Notification',
-          windowHandles,
-        );
-        await driver.delay(500);
+        await switchToNotificationWindow(driver);
 
         // check dialog contents
         const result = await driver.findElement('.snap-ui-renderer__panel');

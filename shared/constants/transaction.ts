@@ -10,7 +10,16 @@ export const IN_PROGRESS_TRANSACTION_STATUSES = [
   TransactionStatus.submitted,
 ];
 
-///: BEGIN:ONLY_INCLUDE_IN(build-mmi)
+export const SIGNING_METHODS = Object.freeze([
+  'eth_sign',
+  'eth_signTypedData',
+  'eth_signTypedData_v1',
+  'eth_signTypedData_v3',
+  'eth_signTypedData_v4',
+  'personal_sign',
+]);
+
+///: BEGIN:ONLY_INCLUDE_IF(build-mmi)
 /**
  * Status for finalized transactions.
  */
@@ -20,7 +29,7 @@ export const FINALIZED_TRANSACTION_STATUSES = [
   TransactionStatus.dropped,
   TransactionStatus.confirmed,
 ];
-///: END:ONLY_INCLUDE_IN
+///: END:ONLY_INCLUDE_IF
 
 /**
  * Transaction Group Status is a MetaMask construct to track the status of groups
@@ -101,6 +110,10 @@ export enum TransactionGroupCategory {
    * will be shown.
    */
   swap = 'swap',
+  /**
+   * Transaction group representing a token swap through MetaMask Swaps, where the final token is sent to another address.
+   */
+  swapAndSend = 'swapAndSend',
 }
 
 /**

@@ -1,56 +1,54 @@
-const { withFixtures, unlockWallet } = require('../helpers');
+const {
+  defaultGanacheOptions,
+  withFixtures,
+  unlockWallet,
+  switchToNotificationWindow,
+  WINDOW_TITLES,
+} = require('../helpers');
 const FixtureBuilder = require('../fixture-builder');
 const { TEST_SNAPS_WEBSITE_URL } = require('./enums');
 
 describe('Test Snap Installed', function () {
-  it('can tell if a snap is installed', async function () {
-    const ganacheOptions = {
-      accounts: [
-        {
-          secretKey:
-            '0x7C9529A67102755B7E6102D6D950AC5D5863C98713805CEC576B945B15B71EAC',
-          balance: 25000000000000000000,
-        },
-      ],
-    };
+  it('can tell if a snap is installed and metrics have been sent (mocked)', async function () {
     await withFixtures(
       {
-        fixtures: new FixtureBuilder().build(),
-        ganacheOptions,
-        failOnConsoleError: false,
+        fixtures: new FixtureBuilder()
+          .withMetaMetricsController({
+            metaMetricsId: 'fake-metrics-id',
+            participateInMetaMetrics: true,
+          })
+          .build(),
+        ganacheOptions: defaultGanacheOptions,
         title: this.test.fullTitle(),
       },
       async ({ driver }) => {
         await unlockWallet(driver);
 
-        // navigate to test snaps page and connect
+        // navigate to test snaps page and connect to dialogs snap
         await driver.openNewPage(TEST_SNAPS_WEBSITE_URL);
-        await driver.delay(1000);
+
+        // wait for page to load
+        await driver.waitForSelector({
+          text: 'Installed Snaps',
+          tag: 'h2',
+        });
+
         const confirmButton = await driver.findElement('#connectdialogs');
         await driver.scrollToElement(confirmButton);
         await driver.delay(500);
         await driver.clickElement('#connectdialogs');
-        await driver.delay(500);
 
         // switch to metamask extension and click connect
-        let windowHandles = await driver.waitUntilXWindowHandles(
-          3,
-          1000,
-          10000,
-        );
-        await driver.switchToWindowWithTitle(
-          'MetaMask Notification',
-          windowHandles,
-        );
+        await switchToNotificationWindow(driver);
         await driver.clickElement({
           text: 'Connect',
           tag: 'button',
         });
 
-        await driver.waitForSelector({ text: 'Install' });
+        await driver.waitForSelector({ text: 'Confirm' });
 
         await driver.clickElement({
-          text: 'Install',
+          text: 'Confirm',
           tag: 'button',
         });
 
@@ -62,7 +60,7 @@ describe('Test Snap Installed', function () {
         });
 
         // click send inputs on test snap page
-        await driver.switchToWindowWithTitle('Test Snaps', windowHandles);
+        await driver.switchToWindowWithTitle(WINDOW_TITLES.TestSnaps);
 
         // wait for npm installation success
         await driver.waitForSelector({
@@ -70,26 +68,23 @@ describe('Test Snap Installed', function () {
           text: 'Reconnect to Dialogs Snap',
         });
 
+        // click to connect to errors snap
         const errorButton = await driver.findElement('#connecterrors');
         await driver.scrollToElement(errorButton);
         await driver.delay(500);
         await driver.clickElement('#connecterrors');
 
         // switch to metamask extension and click connect
-        windowHandles = await driver.waitUntilXWindowHandles(3, 1000, 10000);
-        await driver.switchToWindowWithTitle(
-          'MetaMask Notification',
-          windowHandles,
-        );
+        await switchToNotificationWindow(driver);
         await driver.clickElement({
           text: 'Connect',
           tag: 'button',
         });
 
-        await driver.waitForSelector({ text: 'Install' });
+        await driver.waitForSelector({ text: 'Confirm' });
 
         await driver.clickElement({
-          text: 'Install',
+          text: 'Confirm',
           tag: 'button',
         });
 
@@ -100,7 +95,7 @@ describe('Test Snap Installed', function () {
           tag: 'button',
         });
 
-        await driver.switchToWindowWithTitle('Test Snaps', windowHandles);
+        await driver.switchToWindowWithTitle(WINDOW_TITLES.TestSnaps);
 
         // wait for npm installation success
         await driver.waitForSelector({

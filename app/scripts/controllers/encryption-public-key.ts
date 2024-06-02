@@ -13,7 +13,7 @@ import {
   OriginalRequest,
 } from '@metamask/message-manager/dist/AbstractMessageManager';
 import {
-  BaseControllerV2,
+  BaseController,
   RestrictedControllerMessenger,
 } from '@metamask/base-controller';
 import { Patch } from 'immer';
@@ -87,14 +87,18 @@ export type EncryptionPublicKeyControllerOptions = {
   messenger: EncryptionPublicKeyControllerMessenger;
   getEncryptionPublicKey: (address: string) => Promise<string>;
   getAccountKeyringType: (account: string) => Promise<string>;
+  // TODO: Replace `any` with type
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   getState: () => any;
+  // TODO: Replace `any` with type
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   metricsEvent: (payload: any, options?: any) => void;
 };
 
 /**
  * Controller for requesting encryption public key requests requiring user approval.
  */
-export default class EncryptionPublicKeyController extends BaseControllerV2<
+export default class EncryptionPublicKeyController extends BaseController<
   typeof controllerName,
   EncryptionPublicKeyControllerState,
   EncryptionPublicKeyControllerMessenger
@@ -105,10 +109,14 @@ export default class EncryptionPublicKeyController extends BaseControllerV2<
 
   private _getAccountKeyringType: (account: string) => Promise<string>;
 
+  // TODO: Replace `any` with type
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private _getState: () => any;
 
   private _encryptionPublicKeyManager: EncryptionPublicKeyManager;
 
+  // TODO: Replace `any` with type
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private _metricsEvent: (payload: any, options?: any) => void;
 
   /**
@@ -352,6 +360,8 @@ export default class EncryptionPublicKeyController extends BaseControllerV2<
   ) {
     messageManager.subscribe((state: MessageManagerState<AbstractMessage>) => {
       const newMessages = this._migrateMessages(
+        // TODO: Replace `any` with type
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         state.unapprovedMessages as any,
       );
       this.update((draftState) => {

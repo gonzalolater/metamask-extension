@@ -47,9 +47,13 @@ export default class AppStateController extends EventEmitter {
       nftsDetectionNoticeDismissed: false,
       showTestnetMessageInDropdown: true,
       showBetaHeader: isBeta(),
-      showProductTour: true,
+      showPermissionsTour: true,
+      showNetworkBanner: true,
+      showAccountBanner: true,
       trezorModel: null,
       currentPopupId: undefined,
+      newPrivacyPolicyToastClickedOrClosed: null,
+      newPrivacyPolicyToastShownDate: null,
       // This key is only used for checking if the user had set advancedGasFee
       // prior to Migration 92.3 where we split out the setting to support
       // multiple networks.
@@ -62,6 +66,12 @@ export default class AppStateController extends EventEmitter {
         '0x5': true,
         '0x539': true,
       },
+      surveyLinkLastClickedOrClosed: null,
+      signatureSecurityAlertResponses: {},
+      // States used for displaying the changed network toast
+      switchedNetworkDetails: null,
+      switchedNetworkNeverShowMessage: false,
+      currentExtensionPopupId: 0,
     });
     this.timer = null;
 
@@ -170,6 +180,24 @@ export default class AppStateController extends EventEmitter {
     });
   }
 
+  setSurveyLinkLastClickedOrClosed(time) {
+    this.store.updateState({
+      surveyLinkLastClickedOrClosed: time,
+    });
+  }
+
+  setNewPrivacyPolicyToastClickedOrClosed() {
+    this.store.updateState({
+      newPrivacyPolicyToastClickedOrClosed: true,
+    });
+  }
+
+  setNewPrivacyPolicyToastShownDate(time) {
+    this.store.updateState({
+      newPrivacyPolicyToastShownDate: time,
+    });
+  }
+
   /**
    * Record the timestamp of the last time the user has seen the recovery phrase reminder
    *
@@ -192,7 +220,7 @@ export default class AppStateController extends EventEmitter {
     });
   }
 
-  ///: BEGIN:ONLY_INCLUDE_IN(snaps)
+  ///: BEGIN:ONLY_INCLUDE_IF(snaps)
   /**
    * Record if popover for snaps privacy warning has been shown
    * on the first install of a snap.
@@ -204,7 +232,7 @@ export default class AppStateController extends EventEmitter {
       snapsInstallPrivacyWarningShown: shown,
     });
   }
-  ///: END:ONLY_INCLUDE_IN
+  ///: END:ONLY_INCLUDE_IF
 
   /**
    * Record the timestamp of the last time the user has seen the outdated browser warning
@@ -355,12 +383,69 @@ export default class AppStateController extends EventEmitter {
   }
 
   /**
-   * Sets whether the product tour should be shown
+   * Sets whether the permissions tour should be shown to the user
    *
-   * @param showProductTour
+   * @param showPermissionsTour
    */
-  setShowProductTour(showProductTour) {
-    this.store.updateState({ showProductTour });
+  setShowPermissionsTour(showPermissionsTour) {
+    this.store.updateState({ showPermissionsTour });
+  }
+
+  /**
+   * Sets whether the Network Banner should be shown
+   *
+   * @param showNetworkBanner
+   */
+  setShowNetworkBanner(showNetworkBanner) {
+    this.store.updateState({ showNetworkBanner });
+  }
+
+  /**
+   * Sets whether the Account Banner should be shown
+   *
+   * @param showAccountBanner
+   */
+  setShowAccountBanner(showAccountBanner) {
+    this.store.updateState({ showAccountBanner });
+  }
+
+  /**
+   * Sets a unique ID for the current extension popup
+   *
+   * @param currentExtensionPopupId
+   */
+  setCurrentExtensionPopupId(currentExtensionPopupId) {
+    this.store.updateState({ currentExtensionPopupId });
+  }
+
+  /**
+   * Sets an object with networkName and appName
+   * or `null` if the message is meant to be cleared
+   *
+   * @param {{ origin: string, networkClientId: string } | null} switchedNetworkDetails - Details about the network that MetaMask just switched to.
+   */
+  setSwitchedNetworkDetails(switchedNetworkDetails) {
+    this.store.updateState({ switchedNetworkDetails });
+  }
+
+  /**
+   * Clears the switched network details in state
+   */
+  clearSwitchedNetworkDetails() {
+    this.store.updateState({ switchedNetworkDetails: null });
+  }
+
+  /**
+   * Remembers if the user prefers to never see the
+   * network switched message again
+   *
+   * @param {boolean} switchedNetworkNeverShowMessage
+   */
+  setSwitchedNetworkNeverShowMessage(switchedNetworkNeverShowMessage) {
+    this.store.updateState({
+      switchedNetworkDetails: null,
+      switchedNetworkNeverShowMessage,
+    });
   }
 
   /**
@@ -397,7 +482,7 @@ export default class AppStateController extends EventEmitter {
     this.store.updateState({ usedNetworks });
   }
 
-  ///: BEGIN:ONLY_INCLUDE_IN(build-mmi)
+  ///: BEGIN:ONLY_INCLUDE_IF(build-mmi)
   /**
    * Set the interactive replacement token with a url and the old refresh token
    *
@@ -415,7 +500,39 @@ export default class AppStateController extends EventEmitter {
     });
   }
 
-  ///: END:ONLY_INCLUDE_IN
+  /**
+   * Set the setCustodianDeepLink with the fromAddress and custodyId
+   *
+   * @param {object} opts
+   * @param opts.fromAddress
+   * @param opts.custodyId
+   * @returns {void}
+   */
+  setCustodianDeepLink({ fromAddress, custodyId }) {
+    this.store.updateState({
+      custodianDeepLink: { fromAddress, custodyId },
+    });
+  }
+
+  ///: END:ONLY_INCLUDE_IF
+
+  getSignatureSecurityAlertResponse(securityAlertId) {
+    return this.store.getState().signatureSecurityAlertResponses[
+      securityAlertId
+    ];
+  }
+
+  addSignatureSecurityAlertResponse(securityAlertResponse) {
+    const currentState = this.store.getState();
+    const { signatureSecurityAlertResponses } = currentState;
+    this.store.updateState({
+      signatureSecurityAlertResponses: {
+        ...signatureSecurityAlertResponses,
+        [securityAlertResponse.securityAlertId]: securityAlertResponse,
+      },
+    });
+  }
+
   /**
    * A setter for the currentPopupId which indicates the id of popup window that's currently active
    *
@@ -435,6 +552,10 @@ export default class AppStateController extends EventEmitter {
   }
 
   _requestApproval() {
+    // If we already have a pending request this is a no-op
+    if (this._approvalRequestId) {
+      return;
+    }
     this._approvalRequestId = uuid();
 
     this.messagingSystem
@@ -448,7 +569,8 @@ export default class AppStateController extends EventEmitter {
         true,
       )
       .catch(() => {
-        // Intentionally ignored as promise not currently used
+        // If the promise fails, we allow a new popup to be triggered
+        this._approvalRequestId = null;
       });
   }
 

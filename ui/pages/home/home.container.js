@@ -1,21 +1,28 @@
 import { compose } from 'redux';
 import { connect } from 'react-redux';
 import { withRouter } from 'react-router-dom';
-///: BEGIN:ONLY_INCLUDE_IN(build-mmi)
+///: BEGIN:ONLY_INCLUDE_IF(build-mmi)
+import { showCustodianDeepLink } from '@metamask-institutional/extension';
 import {
   getMmiPortfolioEnabled,
   getMmiPortfolioUrl,
+  getCustodianDeepLink,
   getWaitForConfirmDeepLinkDialog,
 } from '../../selectors/institutional/selectors';
-import { mmiActionsFactory } from '../../store/institutional/institution-background';
+import {
+  mmiActionsFactory,
+  setCustodianDeepLink,
+} from '../../store/institutional/institution-background';
+import { showCustodyConfirmLink } from '../../store/institutional/institution-actions';
 import { getInstitutionalConnectRequests } from '../../ducks/institutional/institutional';
-///: END:ONLY_INCLUDE_IN
+///: END:ONLY_INCLUDE_IF
 import {
   activeTabHasPermissions,
+  getUseExternalServices,
   getFirstPermissionRequest,
-  ///: BEGIN:ONLY_INCLUDE_IN(snaps)
+  ///: BEGIN:ONLY_INCLUDE_IF(snaps)
   getFirstSnapInstallOrUpdateRequest,
-  ///: END:ONLY_INCLUDE_IN
+  ///: END:ONLY_INCLUDE_IF
   getIsMainnet,
   getOriginOfCurrentTab,
   getTotalUnapprovedCount,
@@ -28,8 +35,7 @@ import {
   getShowTermsOfUse,
   getShowOutdatedBrowserWarning,
   getNewNetworkAdded,
-  hasUnsignedQRHardwareTransaction,
-  hasUnsignedQRHardwareMessage,
+  getIsSigningQRHardwareTransaction,
   getNewNftAddedMessage,
   getNewTokensImported,
   getShouldShowSeedPhraseReminder,
@@ -37,7 +43,17 @@ import {
   getSuggestedTokens,
   getSuggestedNfts,
   getApprovalFlows,
+  getNewTokensImportedError,
+  hasPendingApprovals,
+  getSelectedInternalAccount,
+  ///: BEGIN:ONLY_INCLUDE_IF(build-mmi)
+  getAccountType,
+  ///: END:ONLY_INCLUDE_IF
 } from '../../selectors';
+import {
+  getIsShowTokenAutodetectModal,
+  getIsSmartTransactionsOptInModalAvailable,
+} from '../../../shared/modules/selectors';
 
 import {
   closeNotificationPopup,
@@ -54,8 +70,14 @@ import {
   setRemoveNftMessage,
   setNewTokensImported,
   setActiveNetwork,
+  setNewTokensImportedError,
+  setShowTokenAutodetectModal,
+  setShowTokenAutodetectModalOnUpgrade,
 } from '../../store/actions';
-import { hideWhatsNewPopup } from '../../ducks/app/app';
+import {
+  hideWhatsNewPopup,
+  openBasicFunctionalityModal,
+} from '../../ducks/app/app';
 import { getWeb3ShimUsageAlertEnabledness } from '../../ducks/metamask/metamask';
 import { getSwapsFeatureIsLive } from '../../ducks/swaps/swaps';
 import { getEnvironmentType } from '../../../app/scripts/lib/util';
@@ -63,6 +85,9 @@ import { getIsBrowserDeprecated } from '../../helpers/utils/util';
 import {
   ENVIRONMENT_TYPE_NOTIFICATION,
   ENVIRONMENT_TYPE_POPUP,
+  ///: BEGIN:ONLY_INCLUDE_IF(keyring-snaps)
+  SNAP_MANAGE_ACCOUNTS_CONFIRMATION_TYPES,
+  ///: END:ONLY_INCLUDE_IF
 } from '../../../shared/constants/app';
 import {
   AlertTypes,
@@ -75,20 +100,20 @@ const mapStateToProps = (state) => {
   const { metamask, appState } = state;
   const {
     seedPhraseBackedUp,
-    selectedAddress,
     connectedStatusPopoverHasBeenShown,
     defaultHomeActiveTabName,
     swapsState,
     firstTimeFlowType,
     completedOnboarding,
   } = metamask;
+  const { address: selectedAddress } = getSelectedInternalAccount(state);
   const { forgottenPassword } = metamask;
   const totalUnapprovedCount = getTotalUnapprovedCount(state);
   const swapsEnabled = getSwapsFeatureIsLive(state);
   const pendingConfirmations = getUnapprovedTemplatedConfirmations(state);
-  ///: BEGIN:ONLY_INCLUDE_IN(build-mmi)
+  ///: BEGIN:ONLY_INCLUDE_IF(build-mmi)
   const institutionalConnectRequests = getInstitutionalConnectRequests(state);
-  ///: END:ONLY_INCLUDE_IN
+  ///: END:ONLY_INCLUDE_IF
 
   const envType = getEnvironmentType();
   const isPopup = envType === ENVIRONMENT_TYPE_POPUP;
@@ -100,12 +125,12 @@ const mapStateToProps = (state) => {
 
   // getFirstPermissionRequest should be updated with snap update logic once we hit main extension release
 
-  ///: BEGIN:ONLY_INCLUDE_IN(snaps)
+  ///: BEGIN:ONLY_INCLUDE_IF(snaps)
   if (!firstPermissionsRequest) {
     firstPermissionsRequest = getFirstSnapInstallOrUpdateRequest(state);
     firstPermissionsRequestId = firstPermissionsRequest?.metadata.id || null;
   }
-  ///: END:ONLY_INCLUDE_IN
+  ///: END:ONLY_INCLUDE_IF
 
   const originOfCurrentTab = getOriginOfCurrentTab(state);
   const shouldShowWeb3ShimUsageNotification =
@@ -115,15 +140,19 @@ const mapStateToProps = (state) => {
     getWeb3ShimUsageStateForOrigin(state, originOfCurrentTab) ===
       Web3ShimUsageAlertStates.recorded;
 
-  const isSigningQRHardwareTransaction =
-    hasUnsignedQRHardwareTransaction(state) ||
-    hasUnsignedQRHardwareMessage(state);
-
   const hasWatchTokenPendingApprovals = getSuggestedTokens(state).length > 0;
 
   const hasWatchNftPendingApprovals = getSuggestedNfts(state).length > 0;
 
+  const hasAllowedPopupRedirectApprovals = hasPendingApprovals(state, [
+    ///: BEGIN:ONLY_INCLUDE_IF(keyring-snaps)
+    SNAP_MANAGE_ACCOUNTS_CONFIRMATION_TYPES.showSnapAccountRedirect,
+    ///: END:ONLY_INCLUDE_IF
+  ]);
+
   return {
+    useExternalServices: getUseExternalServices(state),
+    isBasicConfigurationModalOpen: appState.showBasicFunctionalityModal,
     forgottenPassword,
     hasWatchTokenPendingApprovals,
     hasWatchNftPendingApprovals,
@@ -156,27 +185,34 @@ const mapStateToProps = (state) => {
       getIsBrowserDeprecated() && getShowOutdatedBrowserWarning(state),
     seedPhraseBackedUp,
     newNetworkAddedName: getNewNetworkAdded(state),
-    isSigningQRHardwareTransaction,
+    isSigningQRHardwareTransaction: getIsSigningQRHardwareTransaction(state),
     newNftAddedMessage: getNewNftAddedMessage(state),
     removeNftMessage: getRemoveNftMessage(state),
     newTokensImported: getNewTokensImported(state),
+    newTokensImportedError: getNewTokensImportedError(state),
     newNetworkAddedConfigurationId: appState.newNetworkAddedConfigurationId,
     onboardedInThisUISession: appState.onboardedInThisUISession,
-    ///: BEGIN:ONLY_INCLUDE_IN(build-mmi)
+    hasAllowedPopupRedirectApprovals,
+    ///: BEGIN:ONLY_INCLUDE_IF(build-mmi)
     waitForConfirmDeepLinkDialog: getWaitForConfirmDeepLinkDialog(state),
     institutionalConnectRequests,
     modalOpen: state.appState.modal.open,
     mmiPortfolioUrl: getMmiPortfolioUrl(state),
     mmiPortfolioEnabled: getMmiPortfolioEnabled(state),
     notificationsToShow: getSortedAnnouncementsToShow(state).length > 0,
-    ///: END:ONLY_INCLUDE_IN
+    custodianDeepLink: getCustodianDeepLink(state),
+    accountType: getAccountType(state),
+    ///: END:ONLY_INCLUDE_IF
+    isSmartTransactionsOptInModalAvailable:
+      getIsSmartTransactionsOptInModalAvailable(state),
+    isShowTokenAutodetectModal: getIsShowTokenAutodetectModal(state),
   };
 };
 
 const mapDispatchToProps = (dispatch) => {
-  ///: BEGIN:ONLY_INCLUDE_IN(build-mmi)
+  ///: BEGIN:ONLY_INCLUDE_IF(build-mmi)
   const mmiActions = mmiActionsFactory();
-  ///: END:ONLY_INCLUDE_IN
+  ///: END:ONLY_INCLUDE_IF
 
   return {
     closeNotificationPopup: () => closeNotificationPopup(),
@@ -209,16 +245,51 @@ const mapDispatchToProps = (dispatch) => {
     setNewTokensImported: (newTokens) => {
       dispatch(setNewTokensImported(newTokens));
     },
+    setNewTokensImportedError: (msg) => {
+      dispatch(setNewTokensImportedError(msg));
+    },
     clearNewNetworkAdded: () => {
       dispatch(setNewNetworkAdded({}));
     },
     setActiveNetwork: (networkConfigurationId) => {
       dispatch(setActiveNetwork(networkConfigurationId));
     },
-    ///: BEGIN:ONLY_INCLUDE_IN(build-mmi)
+    setTokenAutodetectModal: (val) => {
+      dispatch(setShowTokenAutodetectModal(val));
+    },
+    setShowTokenAutodetectModalOnUpgrade: (val) => {
+      dispatch(setShowTokenAutodetectModalOnUpgrade(val));
+    },
+    ///: BEGIN:ONLY_INCLUDE_IF(build-mmi)
     setWaitForConfirmDeepLinkDialog: (wait) =>
       dispatch(mmiActions.setWaitForConfirmDeepLinkDialog(wait)),
-    ///: END:ONLY_INCLUDE_IN
+    showCustodianDeepLink: ({
+      txId = undefined,
+      fromAddress,
+      custodyId,
+      onDeepLinkFetched = () => undefined,
+      onDeepLinkShown = () => undefined,
+      isSignature = false,
+      isNotification = false,
+    }) =>
+      showCustodianDeepLink({
+        dispatch,
+        mmiActions,
+        txId,
+        fromAddress,
+        custodyId,
+        closeNotification: isNotification,
+        onDeepLinkFetched,
+        onDeepLinkShown,
+        showCustodyConfirmLink,
+        isSignature,
+      }),
+    cleanCustodianDeepLink: () => {
+      dispatch(setCustodianDeepLink({}));
+    },
+    ///: END:ONLY_INCLUDE_IF
+    setBasicFunctionalityModalOpen: () =>
+      dispatch(openBasicFunctionalityModal()),
   };
 };
 

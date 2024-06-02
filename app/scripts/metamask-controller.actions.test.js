@@ -12,8 +12,9 @@ import {
 import { ApprovalRequestNotFoundError } from '@metamask/approval-controller';
 import { PermissionsRequestNotFoundError } from '@metamask/permission-controller';
 import nock from 'nock';
+import mockEncryptor from '../../test/lib/mock-encryptor';
 
-const { Ganache } = require('../../test/e2e/ganache');
+const { Ganache } = require('../../test/e2e/seeder/ganache');
 
 const ganacheServer = new Ganache();
 
@@ -96,15 +97,7 @@ describe('MetaMaskController', function () {
       );
     metamaskController = new MetaMaskController({
       showUserConfirmation: noop,
-      encryptor: {
-        encrypt(_, object) {
-          this.object = object;
-          return Promise.resolve('mock-encrypted');
-        },
-        decrypt() {
-          return Promise.resolve(this.object);
-        },
-      },
+      encryptor: mockEncryptor,
       initLangCode: 'en_US',
       platform: {
         showTransactionNotification: () => undefined,
@@ -260,7 +253,7 @@ describe('MetaMaskController', function () {
           Promise.resolve({ supportsInterface: supportsInterfaceStub }),
         );
       sinon
-        .stub(metamaskController.tokensController, 'getNetworkClientById')
+        .stub(metamaskController.controllerMessenger, 'call')
         .callsFake(() => ({
           configuration: {
             chainId: '0xa',
@@ -273,10 +266,9 @@ describe('MetaMaskController', function () {
         decimals,
         networkClientId: 'networkClientId1',
       });
-      assert.strictEqual(
-        metamaskController.tokensController.getNetworkClientById.getCall(0)
-          .args[0],
-        'networkClientId1',
+      assert.deepStrictEqual(
+        metamaskController.controllerMessenger.call.getCall(0).args,
+        ['NetworkController:getNetworkClientById', 'networkClientId1'],
       );
     });
   });

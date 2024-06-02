@@ -355,6 +355,10 @@ export type MetaMetricsUserTraits = {
    */
   token_detection_enabled?: boolean;
   /**
+   * Does the user have native currency enabled?
+   */
+  use_native_as_primary_currency?: boolean;
+  /**
    * Does the user have desktop enabled?
    */
   desktop_enabled?: boolean;
@@ -362,7 +366,7 @@ export type MetaMetricsUserTraits = {
    * Whether the security provider feature has been enabled.
    */
   security_providers?: string[];
-  ///: BEGIN:ONLY_INCLUDE_IN(build-mmi)
+  ///: BEGIN:ONLY_INCLUDE_IF(build-mmi)
   /**
    * The address of the MMI account in question
    */
@@ -375,7 +379,7 @@ export type MetaMetricsUserTraits = {
    * Is the user using a custodian account
    */
   mmi_is_custodian?: boolean;
-  ///: END:ONLY_INCLUDE_IN
+  ///: END:ONLY_INCLUDE_IF
 };
 
 export enum MetaMetricsUserTrait {
@@ -438,6 +442,10 @@ export enum MetaMetricsUserTrait {
    */
   TokenDetectionEnabled = 'token_detection_enabled',
   /**
+   * Identified when the user enables native currency.
+   */
+  UseNativeCurrencyAsPrimaryCurrency = 'use_native_currency_as_primary_currency',
+  /**
    * Identified when the user enables desktop.
    */
   DesktopEnabled = 'desktop_enabled',
@@ -445,7 +453,7 @@ export enum MetaMetricsUserTrait {
    * Identified when the security provider feature is enabled.
    */
   SecurityProviders = 'security_providers',
-  ///: BEGIN:ONLY_INCLUDE_IN(build-mmi)
+  ///: BEGIN:ONLY_INCLUDE_IF(build-mmi)
   /**
    * Identified when we get the current account in question
    */
@@ -458,10 +466,8 @@ export enum MetaMetricsUserTrait {
    * Identified when the user connects a custodian
    */
   MmiIsCustodian = 'mmi_is_custodian',
-  ///: END:ONLY_INCLUDE_IN
-  ///: BEGIN:ONLY_INCLUDE_IN(petnames)
+  ///: END:ONLY_INCLUDE_IF
   PetnameAddressCount = 'petname_addresses_count',
-  ///: END:ONLY_INCLUDE_IN
 }
 
 /**
@@ -484,10 +490,16 @@ export const REJECT_NOTIFICATION_CLOSE = 'Cancel Via Notification Close';
 export const REJECT_NOTIFICATION_CLOSE_SIG =
   'Cancel Sig Request Via Notification Close';
 
+/**
+ * The name of the event. Event definitions with corresponding properties can be found in the following document:
+ *
+ * @see {@link https://www.notion.so/f2997ab32326441793ff790ba5c60a6a?v=267d984721cd4a26be610b5caa3e25b7&pvs=4}
+ */
 export enum MetaMetricsEventName {
   AccountAdded = 'Account Added',
   AccountAddSelected = 'Account Add Selected',
   AccountAddFailed = 'Account Add Failed',
+  AccountDetailsOpened = 'Account Details Opened',
   AccountPasswordCreated = 'Account Password Created',
   AccountReset = 'Account Reset',
   AccountRenamed = 'Account Renamed',
@@ -499,13 +511,27 @@ export enum MetaMetricsEventName {
   AppLocked = 'App Locked',
   AppWindowExpanded = 'App Window Expanded',
   BridgeLinkClicked = 'Bridge Link Clicked',
+  DappViewed = 'Dapp Viewed',
   DecryptionApproved = 'Decryption Approved',
   DecryptionRejected = 'Decryption Rejected',
   DecryptionRequested = 'Decryption Requested',
+  DisablingAccountNotifications = 'Disabling Account Notifications',
+  EnablingAccountNotifications = 'Enabling Account Notifications',
+  DisablingNotifications = 'Disabling Notifications',
+  DismissEnablingNotificationsFlow = 'Dismiss Enabling Notifications Flow',
+  EmptyBuyBannerDisplayed = 'Empty Buy Banner Displayed',
+  EmptyBuyBannerClicked = 'Empty Buy Banner Clicked',
+  EmptyReceiveBannerDisplayed = 'Empty Receive Banner Displayed',
+  EmptyReceiveBannerClicked = 'Empty Receive Banner Clicked',
+  EmptyNftsBannerDisplayed = 'Empty NFTs Banner Displayed',
+  EmptyNftsBannerClicked = 'Empty NFTs Banner Clicked',
+  EnablingNotifications = 'Enabling Notifications',
   EncryptionPublicKeyApproved = 'Encryption Approved',
   EncryptionPublicKeyRejected = 'Encryption Rejected',
   EncryptionPublicKeyRequested = 'Encryption Requested',
   ExternalLinkClicked = 'External Link Clicked',
+  FeatureAnnouncementEnabled = 'Feature Announcement Enabled',
+  FeatureAnnouncementDisabled = 'Feature Announcement Disabled',
   KeyExportSelected = 'Key Export Selected',
   KeyExportRequested = 'Key Export Requested',
   KeyExportFailed = 'Key Export Failed',
@@ -518,12 +544,13 @@ export enum MetaMetricsEventName {
   KeyGasFeeEstimationBuySwapTokens = 'Key Show Gas Fee Estimation, Buy Crypto and Swap Tokens',
   KeyAutoDetectTokens = 'Key Autodetect tokens',
   KeyBatchAccountBalanceRequests = 'Key Batch account balance requests',
+  MarkAllNotificationsRead = 'Mark All Notifications Read',
   MetricsOptIn = 'Metrics Opt In',
   MetricsOptOut = 'Metrics Opt Out',
   NavAccountMenuOpened = 'Account Menu Opened',
-  NavAccountDetailsOpened = 'Account Details Opened',
   NavConnectedSitesOpened = 'Connected Sites Opened',
   NavMainMenuOpened = 'Main Menu Opened',
+  NavPermissionsOpened = 'Permissions Opened',
   NavNetworkMenuOpened = 'Network Menu Opened',
   NavSettingsOpened = 'Settings Opened',
   NavAccountSwitched = 'Account Switched',
@@ -532,6 +559,9 @@ export enum MetaMetricsEventName {
   NavSendButtonClicked = 'Send Button Clicked',
   NavSwapButtonClicked = 'Swap Button Clicked',
   NftAdded = 'NFT Added',
+  NotificationPageOpened = 'Notification Page Opened',
+  NotificationItemClicked = 'Notification Item Clicked',
+  NotificationDetailClicked = 'Notification Detail Clicked',
   OnboardingWalletCreationStarted = 'Wallet Setup Selected',
   OnboardingWalletImportStarted = 'Wallet Import Started',
   OnboardingWalletCreationAttempted = 'Wallet Password Created',
@@ -543,8 +573,12 @@ export enum MetaMetricsEventName {
   OnboardingWalletSecurityPhraseWrittenDown = 'SRP Backup Confirm Display',
   OnboardingWalletSecurityPhraseConfirmed = 'SRP Backup Confirmed',
   OnboardingWalletCreationComplete = 'Wallet Created',
+  OnboardingWalletCreationCompleteWithAuthenticating = 'Wallet Created with Authenticating',
   OnboardingWalletSetupComplete = 'Application Opened',
   OnboardingWalletAdvancedSettings = 'Settings Updated',
+  OnboardingWalletAdvancedSettingsWithAuthenticating = 'Settings Updated with Authenticating',
+  OnboardingWalletAdvancedSettingsWithoutAuthenticating = 'Settings Updated without Authenticating',
+  OnboardingWalletAdvancedSettingsTurnOffProfileSyncing = 'Turn Off Profile Syncing',
   OnboardingWalletImportAttempted = 'Wallet Import Attempted',
   OnboardingWalletVideoPlay = 'SRP Intro Video Played',
   OnboardingTwitterClick = 'External Link Clicked',
@@ -568,6 +602,7 @@ export enum MetaMetricsEventName {
   SignatureRejected = 'Signature Rejected',
   SignatureRequested = 'Signature Requested',
   SimulationFails = 'Simulation Fails',
+  SimulationIncompleteAssetDisplayed = 'Incomplete Asset Displayed',
   SrpRevealStarted = 'Reveal SRP Initiated',
   SrpRevealClicked = 'Clicked Reveal Secret Recovery',
   SrpRevealViewed = 'Views Reveal Secret Recovery',
@@ -583,21 +618,26 @@ export enum MetaMetricsEventName {
   SrpViewSrpText = 'Views SRP',
   SrpCopiedToClipboard = 'Copies SRP to clipboard',
   SrpToConfirmBackup = 'SRP Backup Confirm Displayed',
+  StakingEntryPointClicked = 'Stake Button Clicked',
+  StartEnablingNotificationsFlow = 'Start Enabling Notifications Flow',
   SupportLinkClicked = 'Support Link Clicked',
   TermsOfUseShown = 'Terms of Use Shown',
   TermsOfUseAccepted = 'Terms of Use Accepted',
   TokenImportButtonClicked = 'Import Token Button Clicked',
   TokenScreenOpened = 'Token Screen Opened',
   TokenAdded = 'Token Added',
+  TokenRemoved = 'Token Removed',
+  NFTRemoved = 'NFT Removed',
   TokenDetected = 'Token Detected',
   TokenHidden = 'Token Hidden',
   TokenImportCanceled = 'Token Import Canceled',
   TokenImportClicked = 'Token Import Clicked',
+  UseNativeCurrencyAsPrimaryCurrency = 'Use Native Currency as Primary Currency',
   WalletSetupStarted = 'Wallet Setup Selected',
   WalletSetupCanceled = 'Wallet Setup Canceled',
   WalletSetupFailed = 'Wallet Setup Failed',
   WalletCreated = 'Wallet Created',
-  ///: BEGIN:ONLY_INCLUDE_IN(build-mmi)
+  ///: BEGIN:ONLY_INCLUDE_IF(build-mmi)
   DeeplinkClicked = 'Deeplink Clicked',
   ConnectCustodialAccountClicked = 'Connect Custodial Account Clicked',
   MMIPortfolioButtonClicked = 'MMI Portfolio Button Clicked',
@@ -613,15 +653,17 @@ export enum MetaMetricsEventName {
   CustodianConnectionCanceled = 'Custodian Connection Canceled',
   CustodianConnectionFailed = 'Custodian Connection Failed',
   CustodialAccountsConnected = 'Custodial Accounts Connected',
-  ///: END:ONLY_INCLUDE_IN
+  ///: END:ONLY_INCLUDE_IF
   AccountDetailMenuOpened = 'Account Details Menu Opened',
   BlockExplorerLinkClicked = 'Block Explorer Clicked',
   AccountRemoved = 'Account Removed',
+  AccountRemoveFailed = 'Account Remove Failed',
   TestNetworksDisplayed = 'Test Networks Displayed',
   AddNetworkButtonClick = 'Add Network Button Clicked',
   CustomNetworkAdded = 'Custom Network Added',
   TokenDetailsOpened = 'Token Details Opened',
   NftScreenOpened = 'NFT Screen Opened',
+  NftDetailsOpened = 'NFT Details Opened',
   ActivityScreenOpened = 'Activity Screen Opened',
   WhatsNewViewed = `What's New Viewed`,
   WhatsNewClicked = `What's New Link Clicked`,
@@ -638,24 +680,57 @@ export enum MetaMetricsEventName {
   TransactionFinalized = 'Transaction Finalized',
   ExitedSwaps = 'Exited Swaps',
   SwapError = 'Swap Error',
-  ///: BEGIN:ONLY_INCLUDE_IN(snaps)
+  ///: BEGIN:ONLY_INCLUDE_IF(snaps)
+  SnapInstallStarted = 'Snap Install Started',
+  SnapInstallFailed = 'Snap Install Failed',
+  SnapInstallRejected = 'Snap Install Rejected',
   SnapInstalled = 'Snap Installed',
   SnapUninstalled = 'Snap Uninstalled',
+  SnapUpdateStarted = 'Snap Update Started',
+  SnapUpdateRejected = 'Snap Update Rejected',
+  SnapUpdateFailed = 'Snap Update Failed',
   SnapUpdated = 'Snap Updated',
   SnapExportUsed = 'Snap Export Used',
-  ///: END:ONLY_INCLUDE_IN
-  ///: BEGIN:ONLY_INCLUDE_IN(build-flask)
+  ///: END:ONLY_INCLUDE_IF
+  ///: BEGIN:ONLY_INCLUDE_IF(build-flask)
   InsightSnapViewed = 'Insight Snap Viewed',
-  ///: END:ONLY_INCLUDE_IN
-  ///: BEGIN:ONLY_INCLUDE_IN(keyring-snaps)
+  ///: END:ONLY_INCLUDE_IF
+  ///: BEGIN:ONLY_INCLUDE_IF(keyring-snaps)
   AddSnapAccountEnabled = 'Add Snap Account Enabled',
-  ///: END:ONLY_INCLUDE_IN
+  AddSnapAccountViewed = 'Add Snap Account Viewed',
+  AddSnapAccountConfirmed = 'Add Snap Account Confirmed',
+  AddSnapAccountCanceled = 'Add Snap Account Canceled',
+  AddSnapAccountSuccessViewed = 'Add Snap Account Success Viewed',
+  AddSnapAccountSuccessClicked = 'Add Snap Account Success Clicked',
+  RemoveSnapAccountViewed = 'Remove Snap Account Viewed',
+  RemoveSnapAccountConfirmed = 'Remove Snap Account Confirmed',
+  RemoveSnapAccountCanceled = 'Remove Snap Account Canceled',
+  RemoveSnapAccountSuccessViewed = 'Remove Snap Account Success Viewed',
+  RemoveSnapAccountSuccessClicked = 'Remove Snap Account Success Clicked',
+  SnapAccountTransactionLoadingViewed = 'Snap Account Transaction Loading Viewed',
+  SnapAccountTransactionFinalizeViewed = 'Snap Account Transaction Finalize Viewed',
+  SnapAccountTransactionFinalizeRedirectGoToSiteClicked = 'Snap Account Transaction Finalize Redirect "Go To Site" Clicked',
+  SnapAccountTransactionFinalizeRedirectSnapUrlClicked = 'Snap Account Transaction Finalize Redirect "Snap URL" Clicked',
+  SnapAccountTransactionFinalizeClosed = 'Snap Account Transaction Finalize Closed',
+  TokenAutoDetectionEnableModal = 'Token Autodetection Enabled from modal',
+  TokenAutoDetectionDisableModal = 'Token Autodetection Disabled from modal',
+  ///: END:ONLY_INCLUDE_IF
+  TurnOffProfileSyncing = 'Turn Off Profile Syncing',
+  TurnOnProfileSyncing = 'Turn On Profile Syncing',
+  TurnOnMetaMetrics = 'Turn On MetaMetrics',
+  TurnOffMetaMetrics = 'Turn Off MetaMetrics',
+  // Notifications
+  PushNotificationReceived = 'Push Notification Received',
+  PushNotificationClicked = 'Push Notification Clicked',
 }
 
 export enum MetaMetricsEventAccountType {
   Default = 'metamask',
   Hardware = 'hardware',
   Imported = 'imported',
+  ///: BEGIN:ONLY_INCLUDE_IF(keyring-snaps)
+  Snap = 'snap',
+  ///: END:ONLY_INCLUDE_IF
 }
 
 export enum MetaMetricsEventAccountImportType {
@@ -680,9 +755,13 @@ export enum MetaMetricsEventCategory {
   Messages = 'Messages',
   Navigation = 'Navigation',
   Network = 'Network',
+  EnableNotifications = 'Enable Notifications',
   Onboarding = 'Onboarding',
+  NotificationInteraction = 'Notification Interaction',
+  NotificationSettings = 'Notification Settings',
   Petnames = 'Petnames',
   Phishing = 'Phishing',
+  PushNotifications = 'Notifications',
   Retention = 'Retention',
   Settings = 'Settings',
   Snaps = 'Snaps',
@@ -690,9 +769,9 @@ export enum MetaMetricsEventCategory {
   Tokens = 'Tokens',
   Transactions = 'Transactions',
   Wallet = 'Wallet',
-  ///: BEGIN:ONLY_INCLUDE_IN(build-mmi)
+  ///: BEGIN:ONLY_INCLUDE_IF(build-mmi)
   MMI = 'Institutional',
-  ///: END:ONLY_INCLUDE_IN
+  ///: END:ONLY_INCLUDE_IF
 }
 
 export enum MetaMetricsEventLinkType {
@@ -716,6 +795,7 @@ export enum MetaMetricsNetworkEventSource {
   CustomNetworkForm = 'custom_network_form',
   PopularNetworkList = 'popular_network_list',
   Dapp = 'dapp',
+  DeprecatedNetworkModal = 'deprecated_network_modal',
 }
 
 export enum MetaMetricsSwapsEventSource {
@@ -736,6 +816,7 @@ export enum MetaMetricsTransactionEventSource {
 }
 
 export enum MetaMetricsEventLocation {
+  SignatureConfirmation = 'signature_confirmation',
   TokenDetails = 'token_details',
   TokenDetection = 'token_detection',
   TokenMenu = 'token_menu',
@@ -744,7 +825,10 @@ export enum MetaMetricsEventLocation {
 export enum MetaMetricsEventUiCustomization {
   FlaggedAsMalicious = 'flagged_as_malicious',
   FlaggedAsSafetyUnknown = 'flagged_as_safety_unknown',
+  FlaggedAsWarning = 'flagged_as_warning',
   GasEstimationFailed = 'gas_estimation_failed',
+  RedesignedConfirmation = 'redesigned_confirmation',
+  SecurityAlertError = 'security_alert_error',
   Siwe = 'sign_in_with_ethereum',
 }
 

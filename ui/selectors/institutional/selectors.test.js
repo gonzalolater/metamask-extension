@@ -1,5 +1,7 @@
 import { toChecksumAddress } from 'ethereumjs-util';
+import { EthAccountType, EthMethod } from '@metamask/keyring-api';
 import { toHex } from '@metamask/controller-utils';
+import { createMockInternalAccount } from '../../../test/jest/mocks';
 import {
   getConfiguredCustodians,
   getCustodianIconForAddress,
@@ -13,6 +15,7 @@ import {
   getMMIAddressFromModalOrAddress,
   getMMIConfiguration,
   getInteractiveReplacementToken,
+  getCustodianDeepLink,
   getIsNoteToTraderSupported,
 } from './selectors';
 
@@ -23,13 +26,34 @@ function buildState(overrides = {}) {
         type: 'test',
         chainId: toHex(1),
       },
-      identities: {
-        '0x5Ab19e7091dD208F352F8E727B6DCC6F8aBB6275': {
-          envName: 'Custody Account A',
-          address: '0x5Ab19e7091dD208F352F8E727B6DCC6F8aBB6275',
+      internalAccounts: {
+        selectedAccount: 'cf8dace4-9439-4bd4-b3a8-88c821c8fcb3',
+        accounts: {
+          'cf8dace4-9439-4bd4-b3a8-88c821c8fcb3': {
+            id: 'cf8dace4-9439-4bd4-b3a8-88c821c8fcb3',
+            metadata: {
+              name: 'Custody Account A',
+              keyring: {
+                type: 'Custody',
+              },
+            },
+            options: {},
+            methods: [
+              EthMethod.PersonalSign,
+              EthMethod.Sign,
+              EthMethod.SignTransaction,
+              EthMethod.SignTypedDataV1,
+              EthMethod.SignTypedDataV3,
+              EthMethod.SignTypedDataV4,
+            ],
+            type: EthAccountType.Eoa,
+            code: '0x',
+            balance: '0x47c9d71831c76efe',
+            nonce: '0x1b',
+            address: '0x5Ab19e7091dD208F352F8E727B6DCC6F8aBB6275',
+          },
         },
       },
-      selectedAddress: '0x5Ab19e7091dD208F352F8E727B6DCC6F8aBB6275',
       waitForConfirmDeepLinkDialog: '123',
       keyrings: [
         {
@@ -160,23 +184,32 @@ describe('Institutional selectors', () => {
       const accountAddress = '0x1';
       const state = buildState({
         metamask: {
-          identities: {
-            [accountAddress]: {
-              address: accountAddress,
+          internalAccounts: {
+            selectedAccount: 'cf8dace4-9439-4bd4-b3a8-88c821c8fcb3',
+            accounts: {
+              'cf8dace4-9439-4bd4-b3a8-88c821c8fcb3': {
+                id: 'cf8dace4-9439-4bd4-b3a8-88c821c8fcb3',
+                metadata: {
+                  name: 'Custody Account A',
+                  keyring: {
+                    type: 'Custody',
+                  },
+                },
+                options: {},
+                methods: [...Object.values(EthMethod)],
+                type: EthAccountType.Eoa,
+                code: '0x',
+                balance: '0x47c9d71831c76efe',
+                nonce: '0x1b',
+                address: accountAddress,
+              },
             },
           },
-          keyrings: [
-            {
-              type: 'Custody',
-              accounts: [accountAddress],
-            },
-          ],
           custodianSupportedChains: {
             [accountAddress]: {
               supportedChains: ['1', '2', '3'],
             },
           },
-          selectedAddress: accountAddress,
           providerConfig: {
             chainId: toHex(1),
           },
@@ -192,23 +225,32 @@ describe('Institutional selectors', () => {
       const accountAddress = '0x1';
       const state = buildState({
         metamask: {
-          identities: {
-            [accountAddress]: {
-              address: accountAddress,
+          internalAccounts: {
+            selectedAccount: 'cf8dace4-9439-4bd4-b3a8-88c821c8fcb3',
+            accounts: {
+              'cf8dace4-9439-4bd4-b3a8-88c821c8fcb3': {
+                id: 'cf8dace4-9439-4bd4-b3a8-88c821c8fcb3',
+                metadata: {
+                  name: 'Custody Account A',
+                  keyring: {
+                    type: 'Custody',
+                  },
+                },
+                options: {},
+                methods: [...Object.values(EthMethod)],
+                type: EthAccountType.Eoa,
+                code: '0x',
+                balance: '0x47c9d71831c76efe',
+                nonce: '0x1b',
+                address: accountAddress,
+              },
             },
           },
-          keyrings: [
-            {
-              type: 'Custody',
-              accounts: [accountAddress],
-            },
-          ],
           custodianSupportedChains: {
             [accountAddress]: {
               supportedChains: ['4'],
             },
           },
-          selectedAddress: accountAddress,
           providerConfig: {
             chainId: toHex(1),
           },
@@ -224,11 +266,6 @@ describe('Institutional selectors', () => {
       const accountAddress = '0x1';
       const state = buildState({
         metamask: {
-          identities: {
-            [accountAddress]: {
-              address: accountAddress,
-            },
-          },
           keyrings: [
             {
               type: 'SomethingElse',
@@ -240,7 +277,24 @@ describe('Institutional selectors', () => {
               supportedChains: ['4'],
             },
           },
-          selectedAddress: accountAddress,
+          internalAccounts: {
+            accounts: {
+              'cf8dace4-9439-4bd4-b3a8-88c821c8fcb3': {
+                address: accountAddress,
+                id: 'cf8dace4-9439-4bd4-b3a8-88c821c8fcb3',
+                metadata: {
+                  name: 'Test Account',
+                  keyring: {
+                    type: 'HD Key Tree',
+                  },
+                },
+                options: {},
+                methods: [...Object.values(EthMethod)],
+                type: EthAccountType.Eoa,
+              },
+            },
+            selectedAccount: 'cf8dace4-9439-4bd4-b3a8-88c821c8fcb3',
+          },
           providerConfig: {
             chainId: toHex(1),
           },
@@ -252,34 +306,30 @@ describe('Institutional selectors', () => {
       expect(isSupported).toBe(true);
     });
 
-    it('throws an error if selectedIdentity is null', () => {
-      const state = buildState({
-        metamask: {
-          identities: {},
-          keyrings: [],
-          custodianSupportedChains: {},
-          selectedAddress: null,
-          providerConfig: {},
-        },
-      });
-
-      expect(() => getIsCustodianSupportedChain(state)).toThrow(
-        'Invalid state',
-      );
-    });
-
     it('throws an error if accountType is null', () => {
       const accountAddress = '0x1';
       const state = buildState({
         metamask: {
-          identities: {
-            [accountAddress]: {
-              address: accountAddress,
+          internalAccounts: {
+            selectedAccount: 'cf8dace4-9439-4bd4-b3a8-88c821c8fcb3',
+            accounts: {
+              'cf8dace4-9439-4bd4-b3a8-88c821c8fcb3': {
+                id: 'cf8dace4-9439-4bd4-b3a8-88c821c8fcb3',
+                metadata: {
+                  name: 'Custody Account A',
+                },
+                options: {},
+                methods: [...Object.values(EthMethod)],
+                type: EthAccountType.Eoa,
+                code: '0x',
+                balance: '0x47c9d71831c76efe',
+                nonce: '0x1b',
+                address: accountAddress,
+              },
             },
           },
           keyrings: [],
           custodianSupportedChains: {},
-          selectedAddress: accountAddress,
           providerConfig: {},
         },
       });
@@ -293,9 +343,25 @@ describe('Institutional selectors', () => {
       const accountAddress = '0x1';
       const state = buildState({
         metamask: {
-          identities: {
-            [accountAddress]: {
-              address: accountAddress,
+          internalAccounts: {
+            selectedAccount: 'cf8dace4-9439-4bd4-b3a8-88c821c8fcb3',
+            accounts: {
+              'cf8dace4-9439-4bd4-b3a8-88c821c8fcb3': {
+                id: 'cf8dace4-9439-4bd4-b3a8-88c821c8fcb3',
+                metadata: {
+                  name: 'Custody Account A',
+                  keyring: {
+                    type: 'Custody',
+                  },
+                },
+                options: {},
+                methods: [...Object.values(EthMethod)],
+                type: EthAccountType.Eoa,
+                code: '0x',
+                balance: '0x47c9d71831c76efe',
+                nonce: '0x1b',
+                address: accountAddress,
+              },
             },
           },
           keyrings: [
@@ -305,7 +371,6 @@ describe('Institutional selectors', () => {
             },
           ],
           custodianSupportedChains: {},
-          selectedAddress: accountAddress,
           providerConfig: null,
         },
       });
@@ -319,9 +384,25 @@ describe('Institutional selectors', () => {
       const accountAddress = '0x1';
       const state = buildState({
         metamask: {
-          identities: {
-            [accountAddress]: {
-              address: accountAddress,
+          internalAccounts: {
+            selectedAccount: 'cf8dace4-9439-4bd4-b3a8-88c821c8fcb3',
+            accounts: {
+              'cf8dace4-9439-4bd4-b3a8-88c821c8fcb3': {
+                id: 'cf8dace4-9439-4bd4-b3a8-88c821c8fcb3',
+                metadata: {
+                  name: 'Custody Account A',
+                  keyring: {
+                    type: 'Custody',
+                  },
+                },
+                options: {},
+                methods: [...Object.values(EthMethod)],
+                type: EthAccountType.Eoa,
+                code: '0x',
+                balance: '0x47c9d71831c76efe',
+                nonce: '0x1b',
+                address: accountAddress,
+              },
             },
           },
           keyrings: [
@@ -333,7 +414,6 @@ describe('Institutional selectors', () => {
           custodianSupportedChains: {
             [accountAddress]: null,
           },
-          selectedAddress: accountAddress,
           providerConfig: {
             chainId: toHex(1),
           },
@@ -349,9 +429,25 @@ describe('Institutional selectors', () => {
       const accountAddress = '0x1';
       const state = buildState({
         metamask: {
-          identities: {
-            [accountAddress]: {
-              address: accountAddress,
+          internalAccounts: {
+            selectedAccount: 'cf8dace4-9439-4bd4-b3a8-88c821c8fcb3',
+            accounts: {
+              'cf8dace4-9439-4bd4-b3a8-88c821c8fcb3': {
+                id: 'cf8dace4-9439-4bd4-b3a8-88c821c8fcb3',
+                metadata: {
+                  name: 'Custody Account A',
+                  keyring: {
+                    type: 'Custody',
+                  },
+                },
+                options: {},
+                methods: [...Object.values(EthMethod)],
+                type: EthAccountType.Eoa,
+                code: '0x',
+                balance: '0x47c9d71831c76efe',
+                nonce: '0x1b',
+                address: accountAddress,
+              },
             },
           },
           keyrings: [
@@ -365,7 +461,6 @@ describe('Institutional selectors', () => {
               supportedChains: [],
             },
           },
-          selectedAddress: accountAddress,
           providerConfig: {
             chainId: toHex(1),
           },
@@ -381,9 +476,25 @@ describe('Institutional selectors', () => {
       const accountAddress = '0x1';
       const state = buildState({
         metamask: {
-          identities: {
-            [accountAddress]: {
-              address: accountAddress,
+          internalAccounts: {
+            selectedAccount: 'cf8dace4-9439-4bd4-b3a8-88c821c8fcb3',
+            accounts: {
+              'cf8dace4-9439-4bd4-b3a8-88c821c8fcb3': {
+                id: 'cf8dace4-9439-4bd4-b3a8-88c821c8fcb3',
+                metadata: {
+                  name: 'Custody Account A',
+                  keyring: {
+                    type: 'Custody',
+                  },
+                },
+                options: {},
+                methods: [...Object.values(EthMethod)],
+                type: EthAccountType.Eoa,
+                code: '0x',
+                balance: '0x47c9d71831c76efe',
+                nonce: '0x1b',
+                address: accountAddress,
+              },
             },
           },
           keyrings: [
@@ -397,7 +508,6 @@ describe('Institutional selectors', () => {
               supportedChains: ['1'],
             },
           },
-          selectedAddress: accountAddress,
           providerConfig: {
             chainId: 1,
           },
@@ -413,9 +523,25 @@ describe('Institutional selectors', () => {
       const accountAddress = '0x1';
       const state = buildState({
         metamask: {
-          identities: {
-            [accountAddress]: {
-              address: accountAddress,
+          internalAccounts: {
+            selectedAccount: 'cf8dace4-9439-4bd4-b3a8-88c821c8fcb3',
+            accounts: {
+              'cf8dace4-9439-4bd4-b3a8-88c821c8fcb3': {
+                id: 'cf8dace4-9439-4bd4-b3a8-88c821c8fcb3',
+                metadata: {
+                  name: 'Custody Account A',
+                  keyring: {
+                    type: 'Custody',
+                  },
+                },
+                options: {},
+                methods: [...Object.values(EthMethod)],
+                type: EthAccountType.Eoa,
+                code: '0x',
+                balance: '0x47c9d71831c76efe',
+                nonce: '0x1b',
+                address: '0x5Ab19e7091dD208F352F8E727B6DCC6F8aBB6275',
+              },
             },
           },
           keyrings: [
@@ -429,7 +555,6 @@ describe('Institutional selectors', () => {
               supportedChains: ['1'],
             },
           },
-          selectedAddress: accountAddress,
           providerConfig: {
             chainId: 'not a hex number',
           },
@@ -443,6 +568,12 @@ describe('Institutional selectors', () => {
   });
 
   describe('getMMIAddressFromModalOrAddress', () => {
+    const mockInternalAccount = createMockInternalAccount({
+      id: 'cf8dace4-9439-4bd4-b3a8-88c821c8fcb3',
+      name: 'Custody Account A',
+      keyringType: 'Custody',
+    });
+
     it('returns modalAddress if it exists', () => {
       const state = {
         appState: {
@@ -455,7 +586,10 @@ describe('Institutional selectors', () => {
           },
         },
         metamask: {
-          selectedAddress: 'selectedAddress',
+          internalAccounts: {
+            accounts: {},
+            selectedAccount: '',
+          },
         },
       };
 
@@ -464,7 +598,7 @@ describe('Institutional selectors', () => {
       expect(address).toBe('modalAddress');
     });
 
-    it('returns selectedAddress if modalAddress does not exist', () => {
+    it('returns selectedAccount if modalAddress does not exist', () => {
       const state = {
         appState: {
           modal: {
@@ -474,16 +608,21 @@ describe('Institutional selectors', () => {
           },
         },
         metamask: {
-          selectedAddress: 'selectedAddress',
+          internalAccounts: {
+            accounts: {
+              [mockInternalAccount.id]: mockInternalAccount,
+            },
+            selectedAccount: mockInternalAccount.id,
+          },
         },
       };
 
       const address = getMMIAddressFromModalOrAddress(state);
 
-      expect(address).toBe('selectedAddress');
+      expect(address).toBe(mockInternalAccount.address);
     });
 
-    it('returns undefined if neither modalAddress nor selectedAddress exist', () => {
+    it('returns undefined if neither modalAddress nor selectedAccount exist', () => {
       const state = {
         appState: {
           modal: {
@@ -492,7 +631,12 @@ describe('Institutional selectors', () => {
             },
           },
         },
-        metamask: {},
+        metamask: {
+          internalAccounts: {
+            accounts: {},
+            selectedAccount: '',
+          },
+        },
       };
 
       const address = getMMIAddressFromModalOrAddress(state);
@@ -549,6 +693,34 @@ describe('Institutional selectors', () => {
       };
 
       const token = getInteractiveReplacementToken(state);
+
+      expect(token).toStrictEqual({});
+    });
+  });
+
+  describe('getCustodianDeepLink', () => {
+    it('returns custodianDeepLink if it exists', () => {
+      const custodianDeepLink = {
+        fromAddress: '0x',
+        custodyId: 'custodyId',
+      };
+      const state = {
+        metamask: {
+          custodianDeepLink,
+        },
+      };
+
+      const token = getCustodianDeepLink(state);
+
+      expect(token).toStrictEqual(custodianDeepLink);
+    });
+
+    it('returns an empty object if custodianDeepLink does not exist', () => {
+      const state = {
+        metamask: {},
+      };
+
+      const token = getCustodianDeepLink(state);
 
       expect(token).toStrictEqual({});
     });

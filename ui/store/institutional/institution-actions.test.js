@@ -14,19 +14,10 @@ const middleware = [thunk];
 const defaultState = {
   metamask: {
     currentLocale: 'test',
-    selectedAddress: '0xFirstAddress',
     providerConfig: { chainId: '0x1' },
     accounts: {
       '0xFirstAddress': {
         balance: '0x0',
-      },
-    },
-    identities: {
-      '0xFirstAddress': {},
-    },
-    cachedBalances: {
-      '0x1': {
-        '0xFirstAddress': '0x0',
       },
     },
     custodyStatusMaps: {
@@ -209,7 +200,6 @@ describe('#updateCustodyState', () => {
         chainId: '0x1',
       },
       featureFlags: {},
-      selectedAddress: '0xAddress',
     };
 
     const custodyState = updateCustodyState(store.dispatch, newState, newState);
@@ -233,7 +223,6 @@ describe('#updateCustodyState', () => {
         chainId: '0x1',
       },
       featureFlags: {},
-      selectedAddress: '0xAddress',
       transactions: [
         {
           id: 0,
@@ -288,7 +277,6 @@ describe('#updateCustodyState', () => {
         chainId: '0x1',
       },
       featureFlags: {},
-      selectedAddress: '0xAddress',
       transactions: [
         {
           id: 0,

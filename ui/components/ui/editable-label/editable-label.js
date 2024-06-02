@@ -8,13 +8,8 @@ import {
   TextVariant,
 } from '../../../helpers/constants/design-system';
 import { getAccountNameErrorMessage } from '../../../helpers/utils/accounts';
-import {
-  ButtonIcon,
-  FormTextField,
-  IconName,
-  Text,
-  Box,
-} from '../../component-library';
+import { ButtonIcon, IconName, Text, Box } from '../../component-library';
+import { FormTextField } from '../../component-library/form-text-field/deprecated';
 
 export default class EditableLabel extends Component {
   static propTypes = {
@@ -76,6 +71,7 @@ export default class EditableLabel extends Component {
         <ButtonIcon
           iconName={IconName.Check}
           onClick={() => this.handleSubmit(isValidAccountName)}
+          data-testid="save-account-label-input"
         />
       </Box>
     );

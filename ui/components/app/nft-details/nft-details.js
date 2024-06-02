@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useContext } from 'react';
 import PropTypes from 'prop-types';
 import { useDispatch, useSelector } from 'react-redux';
 import { useHistory } from 'react-router-dom';
@@ -25,7 +25,7 @@ import {
   getCurrentChainId,
   getCurrentNetwork,
   getIpfsGateway,
-  getSelectedIdentity,
+  getSelectedInternalAccount,
 } from '../../../selectors';
 import AssetNavigation from '../../../pages/asset/components/asset-navigation';
 import { getNftContracts } from '../../../ducks/metamask/metamask';
@@ -52,8 +52,12 @@ import {
 } from '../../../../shared/constants/transaction';
 import { ButtonIcon, IconName, Text } from '../../component-library';
 import Tooltip from '../../ui/tooltip';
-import { decWEIToDecETH } from '../../../../shared/modules/conversion.utils';
 import { NftItem } from '../../multichain/nft-item';
+import {
+  MetaMetricsEventName,
+  MetaMetricsEventCategory,
+} from '../../../../shared/constants/metametrics';
+import { MetaMetricsContext } from '../../../contexts/metametrics';
 
 export default function NftDetails({ nft }) {
   const {
@@ -74,15 +78,16 @@ export default function NftDetails({ nft }) {
   const nftContracts = useSelector(getNftContracts);
   const currentNetwork = useSelector(getCurrentChainId);
   const currentChain = useSelector(getCurrentNetwork);
+  const trackEvent = useContext(MetaMetricsContext);
 
   const [addressCopied, handleAddressCopy] = useCopyToClipboard();
 
   const nftContractName = nftContracts.find(({ address: contractAddress }) =>
     isEqualCaseInsensitive(contractAddress, address),
   )?.name;
-  const selectedAccountName = useSelector(
-    (state) => getSelectedIdentity(state).name,
-  );
+  const {
+    metadata: { name: selectedAccountName },
+  } = useSelector(getSelectedInternalAccount);
   const nftImageAlt = getNftImageAlt(nft);
   const nftSrcUrl = imageOriginal ?? image;
   const nftImageURL = getAssetImageURL(imageOriginal ?? image, ipfsGateway);
@@ -90,15 +95,47 @@ export default function NftDetails({ nft }) {
   const isImageHosted = image?.startsWith('https:');
 
   const formattedTimestamp = formatDate(
-    new Date(lastSale?.event_timestamp).getTime(),
+    new Date(lastSale?.timestamp).getTime(),
     'M/d/y',
   );
 
-  const onRemove = () => {
-    dispatch(removeAndIgnoreNft(address, tokenId));
-    dispatch(setNewNftAddedMessage(''));
-    dispatch(setRemoveNftMessage('success'));
-    history.push(DEFAULT_ROUTE);
+  const { chainId } = currentChain;
+  useEffect(() => {
+    trackEvent({
+      event: MetaMetricsEventName.NftDetailsOpened,
+      category: MetaMetricsEventCategory.Tokens,
+      properties: {
+        chain_id: chainId,
+      },
+    });
+  }, [trackEvent, chainId]);
+
+  const onRemove = async () => {
+    let isSuccessfulEvent = false;
+    try {
+      await dispatch(removeAndIgnoreNft(address, tokenId));
+      dispatch(setNewNftAddedMessage(''));
+      dispatch(setRemoveNftMessage('success'));
+      isSuccessfulEvent = true;
+    } catch (err) {
+      dispatch(setNewNftAddedMessage(''));
+      dispatch(setRemoveNftMessage('error'));
+    } finally {
+      // track event
+      trackEvent({
+        event: MetaMetricsEventName.NFTRemoved,
+        category: 'Wallet',
+        properties: {
+          token_contract_address: address,
+          tokenId: tokenId.toString(),
+          asset_type: AssetType.NFT,
+          token_standard: standard,
+          chain_id: currentNetwork,
+          isSuccessful: isSuccessfulEvent,
+        },
+      });
+      history.push(DEFAULT_ROUTE);
+    }
   };
 
   const prevNft = usePrevious(nft);
@@ -124,7 +161,8 @@ export default function NftDetails({ nft }) {
   };
 
   const openSeaLink = getOpenSeaLink();
-  const sendDisabled = standard !== TokenStandard.ERC721;
+  const sendDisabled =
+    standard !== TokenStandard.ERC721 && standard !== TokenStandard.ERC1155;
   const inPopUp = getEnvironmentType() === ENVIRONMENT_TYPE_POPUP;
 
   const onSend = async () => {
@@ -134,6 +172,7 @@ export default function NftDetails({ nft }) {
         details: nft,
       }),
     );
+    // We only allow sending one NFT at a time
     history.push(SEND_ROUTE);
   };
 
@@ -299,9 +338,8 @@ export default function NftDetails({ nft }) {
                     overflowWrap={OverflowWrap.BreakWord}
                     marginBottom={4}
                   >
-                    {`${Number(decWEIToDecETH(lastSale.total_price))} ${
-                      lastSale.payment_token.symbol
-                    }`}
+                    {lastSale?.price?.amount?.decimal}{' '}
+                    {lastSale?.price?.currency?.symbol}
                   </Text>
                 </Box>
               </Box>
@@ -386,10 +424,15 @@ NftDetails.propTypes = {
       profile_img_url: PropTypes.string,
     }),
     lastSale: PropTypes.shape({
-      event_timestamp: PropTypes.string,
-      total_price: PropTypes.string,
-      payment_token: PropTypes.shape({
-        symbol: PropTypes.string,
+      timestamp: PropTypes.string,
+      price: PropTypes.shape({
+        amount: PropTypes.shape({
+          native: PropTypes.string,
+          decimal: PropTypes.string,
+        }),
+        currency: PropTypes.shape({
+          symbol: PropTypes.string,
+        }),
       }),
     }),
   }),

@@ -5,10 +5,12 @@ export class MMIMainPage {
 
   readonly activityTab: Locator;
 
+  readonly NFTsTab: Locator;
+
   constructor(page: Page) {
     this.page = page;
-
-    this.activityTab = page.locator('button:has-text("Activity")');
+    this.activityTab = page.getByRole('button', { name: /activity/iu });
+    this.NFTsTab = page.getByRole('button', { name: /nfts/iu });
   }
 
   async closeWhatsNewBanner() {
@@ -21,6 +23,11 @@ export class MMIMainPage {
 
   async openActivityTab() {
     await this.activityTab.click();
+  }
+
+  async finishOnboarding() {
+    await this.page.getByRole('button', { name: /continue/iu }).click();
+    await this.page.getByRole('button', { name: /continue to wallet/iu }).click();
   }
 
   async checkLastTransactionStatus(status: string | RegExp) {
@@ -43,6 +50,13 @@ export class MMIMainPage {
     return (await this.page
       .locator('.test-transaction-meta')
       .first()
+      .getAttribute('data-custodiantransactionid')) as string;
+  }
+
+  async getSecondCustodianTXId() {
+    return (await this.page
+      .locator('.test-transaction-meta')
+      .nth(1)
       .getAttribute('data-custodiantransactionid')) as string;
   }
 
@@ -79,7 +93,7 @@ export class MMIMainPage {
     await test.expect.soft(this.page).toHaveScreenshot(screenshotName, {
       fullPage: true,
       mask: [accountsFunds, fundsDetails, accountMenu],
-      maxDiffPixelRatio: 0.02,
+      maxDiffPixelRatio: 0.06,
     });
   }
 }

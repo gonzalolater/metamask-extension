@@ -10,8 +10,8 @@ import { useI18nContext } from '../../../hooks/useI18nContext';
 import withModalProps from '../../../helpers/higher-order-components/with-modal-props';
 import { toChecksumHexAddress } from '../../../../shared/modules/hexstring-utils';
 import { mmiActionsFactory } from '../../../store/institutional/institution-background';
-import { setSelectedAddress } from '../../../store/actions';
-import { getMetaMaskIdentities } from '../../../selectors';
+import { setSelectedInternalAccount } from '../../../store/actions';
+import { getInternalAccounts } from '../../../selectors';
 import {
   getMMIAddressFromModalOrAddress,
   getCustodyAccountDetails,
@@ -30,19 +30,19 @@ import {
   Button,
   BUTTON_VARIANT,
   Modal,
-  ModalHeader,
-  ModalContent,
   ModalOverlay,
   Text,
   Box,
 } from '../../component-library';
+import { ModalContent } from '../../component-library/modal-content/deprecated';
+import { ModalHeader } from '../../component-library/modal-header/deprecated';
 
 const CustodyConfirmLink = ({ hideModal }) => {
   const t = useI18nContext();
   const dispatch = useDispatch();
   const mmiActions = mmiActionsFactory();
   const trackEvent = useContext(MetaMetricsContext);
-  const mmiAccounts = useSelector(getMetaMaskIdentities);
+  const mmiAccounts = useSelector(getInternalAccounts);
   const address = useSelector(getMMIAddressFromModalOrAddress);
   const custodyAccountDetails = useSelector(getCustodyAccountDetails);
   const { custodians } = useSelector(getMMIConfiguration);
@@ -60,11 +60,11 @@ const CustodyConfirmLink = ({ hideModal }) => {
     }
 
     if (ethereum) {
-      const ethAccount = Object.keys(mmiAccounts).find((account) =>
-        ethereum.accounts.includes(account.toLowerCase()),
-      );
+      const ethAccount = Object.values(mmiAccounts)
+        .map((internalAccount) => internalAccount.address)
+        .find((account) => ethereum.accounts.includes(account.toLowerCase()));
 
-      ethAccount && dispatch(setSelectedAddress(ethAccount.toLowerCase()));
+      ethAccount && dispatch(setSelectedInternalAccount(ethAccount.id));
     }
 
     trackEvent({

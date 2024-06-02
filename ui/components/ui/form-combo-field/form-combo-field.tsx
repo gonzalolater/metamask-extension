@@ -8,21 +8,21 @@ import React, {
   useState,
 } from 'react';
 import classnames from 'classnames';
-import {
-  ButtonIcon,
-  ButtonIconSize,
-  FormTextField,
-  IconName,
-} from '../../component-library';
+import { ButtonIcon, ButtonIconSize, IconName } from '../../component-library';
+import { FormTextField } from '../../component-library/form-text-field/deprecated';
 import { I18nContext } from '../../../contexts/i18n';
 import { Display, IconColor } from '../../../helpers/constants/design-system';
 
-export interface FormComboFieldOption {
-  primaryLabel: string;
+export type FormComboFieldOption = {
+  value: string;
+  primaryLabel?: string;
   secondaryLabel?: string;
-}
+};
 
-export interface FormComboFieldProps {
+export type FormComboFieldProps<Option extends FormComboFieldOption> = {
+  /** Whether to hide the 'no option' when there are no options to display. */
+  hideDropdownIfNoOptions?: boolean;
+
   /** The maximum height of the dropdown in pixels. */
   maxDropdownHeight?: number;
 
@@ -33,20 +33,19 @@ export interface FormComboFieldProps {
   onChange?: (value: string) => void;
 
   /** Callback function to invoke when a dropdown option is clicked. */
-  onOptionClick?: (option: FormComboFieldOption) => void;
+  onOptionClick?: (option: Option) => void;
 
   /**
    * The options to display in the dropdown.
-   * An array of objects with a 'primaryLabel' and optionally a 'secondaryLabel' property.`
    */
-  options: FormComboFieldOption[];
+  options: Option[];
 
   /** The placeholder text to display in the field when the value is empty. */
   placeholder?: string;
 
   /** The value to display in the field. */
   value: string;
-}
+};
 
 function Option({
   option,
@@ -66,7 +65,7 @@ function Option({
     [onClick, option],
   );
 
-  const { primaryLabel, secondaryLabel } = option;
+  const { primaryLabel, secondaryLabel, value } = option;
 
   return (
     <div
@@ -74,7 +73,9 @@ function Option({
       className="form-combo-field__option"
       onClick={handleClick}
     >
-      <span className="form-combo-field__option-primary">{primaryLabel}</span>
+      <span className="form-combo-field__option-primary">
+        {primaryLabel ?? value}
+      </span>
       {secondaryLabel ? (
         <span className="form-combo-field__option-secondary">
           {secondaryLabel}
@@ -84,20 +85,24 @@ function Option({
   );
 }
 
-function Dropdown({
+function Dropdown<Option extends FormComboFieldOption>({
+  hideDropdownIfNoOptions,
   maxDropdownHeight,
   noOptionsText,
   onOptionClick,
   options,
   width,
 }: {
+  hideDropdownIfNoOptions: boolean;
   maxDropdownHeight?: number;
   noOptionsText?: string;
-  onOptionClick: (option?: FormComboFieldOption) => void;
-  options: FormComboFieldOption[];
+  onOptionClick: (option?: Option) => void;
+  options: Option[];
   width: number;
 }) {
   const t = useContext(I18nContext);
+  // TODO: Replace `any` with type
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const ref = useRef<any>();
   const maxHeight = maxDropdownHeight ?? 179;
   const [dropdownHeight, setDropdownHeight] = useState(0);
@@ -115,9 +120,12 @@ function Dropdown({
         'form-combo-field__dropdown__scroll': dropdownHeight > maxHeight,
       })}
     >
-      {options.length === 0 && (
+      {options.length === 0 && !hideDropdownIfNoOptions && (
         <Option
-          option={{ primaryLabel: noOptionsText ?? t('comboNoOptions') }}
+          option={{
+            primaryLabel: noOptionsText ?? t('comboNoOptions'),
+            value: '',
+          }}
           onClick={() => onOptionClick(undefined)}
         />
       )}
@@ -134,7 +142,8 @@ function Dropdown({
   );
 }
 
-export default function FormComboField({
+export default function FormComboField<Option extends FormComboFieldOption>({
+  hideDropdownIfNoOptions = false,
   maxDropdownHeight,
   noOptionsText,
   onChange,
@@ -142,10 +151,14 @@ export default function FormComboField({
   options,
   placeholder,
   value,
-}: FormComboFieldProps) {
+}: FormComboFieldProps<Option>) {
   const [dropdownVisible, setDropdownVisible] = useState(false);
+  // TODO: Replace `any` with type
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const valueRef = useRef<any>();
   const [valueWidth, setValueWidth] = useState(0);
+  // TODO: Replace `any` with type
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const inputRef = useRef<any>(null);
   const t = useContext(I18nContext);
 
@@ -154,6 +167,8 @@ export default function FormComboField({
   });
 
   const handleBlur = useCallback(
+    // TODO: Replace `any` with type
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (e?: any) => {
       if (e?.relatedTarget?.className !== 'form-combo-field__option') {
         setDropdownVisible(false);
@@ -163,6 +178,8 @@ export default function FormComboField({
   );
 
   const handleChange = useCallback(
+    // TODO: Replace `any` with type
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (e: any) => {
       onChange?.(e.target.value);
     },
@@ -170,11 +187,11 @@ export default function FormComboField({
   );
 
   const handleOptionClick = useCallback(
-    (option) => {
+    (option?: Option) => {
       setDropdownVisible(false);
 
       if (option) {
-        handleChange({ target: { value: option.primaryLabel } });
+        handleChange({ target: { value: option.value } });
         onOptionClick?.(option);
       }
 
@@ -201,6 +218,8 @@ export default function FormComboField({
           inputRef={inputRef}
           placeholder={placeholder}
           onBlur={handleBlur}
+          // TODO: Replace `any` with type
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           onKeyUp={(e: any) => {
             if (e.key === 'Enter') {
               handleBlur();
@@ -226,6 +245,7 @@ export default function FormComboField({
       </div>
       {dropdownVisible && (
         <Dropdown
+          hideDropdownIfNoOptions={hideDropdownIfNoOptions}
           maxDropdownHeight={maxDropdownHeight}
           noOptionsText={noOptionsText}
           onOptionClick={handleOptionClick}

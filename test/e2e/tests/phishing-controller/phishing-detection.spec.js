@@ -1,7 +1,7 @@
 const { strict: assert } = require('assert');
 
 const {
-  convertToHexValue,
+  defaultGanacheOptions,
   withFixtures,
   openDapp,
   unlockWallet,
@@ -19,16 +19,6 @@ const {
 } = require('./mocks');
 
 describe('Phishing Detection', function () {
-  const ganacheOptions = {
-    accounts: [
-      {
-        secretKey:
-          '0x7C9529A67102755B7E6102D6D950AC5D5863C98713805CEC576B945B15B71EAC',
-        balance: convertToHexValue(25000000000000000000),
-      },
-    ],
-  };
-
   describe('Phishing Detection Mock', function () {
     it('should be updated to use v1 of the API', function () {
       // Update the fixture in phishing-controller/mocks.js if this test fails
@@ -47,7 +37,7 @@ describe('Phishing Detection', function () {
     await withFixtures(
       {
         fixtures: new FixtureBuilder().build(),
-        ganacheOptions,
+        ganacheOptions: defaultGanacheOptions,
         title: this.test.fullTitle(),
         testSpecificMock: async (mockServer) => {
           return setupPhishingDetectionMocks(mockServer, {
@@ -56,7 +46,6 @@ describe('Phishing Detection', function () {
           });
         },
         dapp: true,
-        failOnConsoleError: false,
       },
       async ({ driver }) => {
         await unlockWallet(driver);
@@ -78,7 +67,7 @@ describe('Phishing Detection', function () {
     await withFixtures(
       {
         fixtures: new FixtureBuilder().build(),
-        ganacheOptions,
+        ganacheOptions: defaultGanacheOptions,
         title: this.test.fullTitle(),
         testSpecificMock: async (mockServer) => {
           return setupPhishingDetectionMocks(mockServer, {
@@ -87,11 +76,10 @@ describe('Phishing Detection', function () {
           });
         },
         dapp: true,
-        dappPaths: ['mock-page-with-iframe'],
+        dappPaths: ['./tests/phishing-controller/mock-page-with-iframe'],
         dappOptions: {
           numberOfDapps: 2,
         },
-        failOnConsoleError: false,
       },
       async ({ driver }) => {
         await unlockWallet(driver);
@@ -117,7 +105,7 @@ describe('Phishing Detection', function () {
     await withFixtures(
       {
         fixtures: new FixtureBuilder().build(),
-        ganacheOptions,
+        ganacheOptions: defaultGanacheOptions,
         title: this.test.fullTitle(),
         testSpecificMock: async (mockServer) => {
           return setupPhishingDetectionMocks(mockServer, {
@@ -126,11 +114,12 @@ describe('Phishing Detection', function () {
           });
         },
         dapp: true,
-        dappPaths: ['mock-page-with-disallowed-iframe'],
+        dappPaths: [
+          './tests/phishing-controller/mock-page-with-disallowed-iframe',
+        ],
         dappOptions: {
           numberOfDapps: 2,
         },
-        failOnConsoleError: false,
       },
       async ({ driver }) => {
         await unlockWallet(driver);
@@ -149,8 +138,11 @@ describe('Phishing Detection', function () {
           text: 'continue to the site.',
         });
 
-        // Ensure we're not on the wallet home page
-        await driver.assertElementNotPresent('[data-testid="wallet-balance"]');
+        // We don't really know what we're going to see at this blocked site, so a waitAtLeast guard of 1000ms is the best choice
+        await driver.assertElementNotPresent(
+          '[data-testid="wallet-balance"]',
+          1000,
+        );
       },
     );
   });
@@ -159,7 +151,7 @@ describe('Phishing Detection', function () {
     await withFixtures(
       {
         fixtures: new FixtureBuilder().build(),
-        ganacheOptions,
+        ganacheOptions: defaultGanacheOptions,
         title: this.test.fullTitle(),
         testSpecificMock: (mockServer) => {
           setupPhishingDetectionMocks(mockServer, {
@@ -169,7 +161,6 @@ describe('Phishing Detection', function () {
           mockConfigLookupOnWarningPage(mockServer, { statusCode: 500 });
         },
         dapp: true,
-        failOnConsoleError: false,
       },
       async ({ driver }) => {
         await unlockWallet(driver);
@@ -184,7 +175,7 @@ describe('Phishing Detection', function () {
         });
         assert.equal(
           await driver.getCurrentUrl(),
-          `https://github.com/MetaMask/eth-phishing-detect/issues/new?title=[Legitimate%20Site%20Blocked]%20127.0.0.1&body=http%3A%2F%2F127.0.0.1%3A8080%2F`,
+          `https://github.com/MetaMask/eth-phishing-detect/issues/new?title=[Legitimate%20Site%20Blocked]%20127.0.0.1&body=http%3A%2F%2F127.0.0.1%2F`,
         );
       },
     );
@@ -197,7 +188,7 @@ describe('Phishing Detection', function () {
     await withFixtures(
       {
         fixtures: new FixtureBuilder().build(),
-        ganacheOptions,
+        ganacheOptions: defaultGanacheOptions,
         title: this.test.fullTitle(),
         testSpecificMock: async (mockServer) => {
           return setupPhishingDetectionMocks(mockServer, {
@@ -206,7 +197,6 @@ describe('Phishing Detection', function () {
           });
         },
         dapp: true,
-        failOnConsoleError: false,
       },
       async ({ driver }) => {
         await unlockWallet(driver);
@@ -223,7 +213,7 @@ describe('Phishing Detection', function () {
           await driver.getCurrentUrl(),
           `https://github.com/MetaMask/eth-phishing-detect/issues/new?title=[Legitimate%20Site%20Blocked]%20${encodeURIComponent(
             phishingSite.hostname,
-          )}&body=${encodeURIComponent(phishingSite.href)}`,
+          )}&body=${encodeURIComponent(`${phishingSite.origin}/`)}`,
         );
       },
     );
@@ -233,7 +223,7 @@ describe('Phishing Detection', function () {
     await withFixtures(
       {
         fixtures: new FixtureBuilder().build(),
-        ganacheOptions,
+        ganacheOptions: defaultGanacheOptions,
         title: this.test.fullTitle(),
         testSpecificMock: async (mockServer) => {
           return setupPhishingDetectionMocks(mockServer, {
@@ -242,7 +232,6 @@ describe('Phishing Detection', function () {
           });
         },
         dapp: true,
-        failOnConsoleError: false,
       },
       async ({ driver }) => {
         await unlockWallet(driver);
@@ -257,7 +246,7 @@ describe('Phishing Detection', function () {
         });
         assert.equal(
           await driver.getCurrentUrl(),
-          `https://github.com/phishfort/phishfort-lists/issues/new?title=[Legitimate%20Site%20Blocked]%20127.0.0.1&body=http%3A%2F%2F127.0.0.1%3A8080%2F`,
+          `https://github.com/phishfort/phishfort-lists/issues/new?title=[Legitimate%20Site%20Blocked]%20127.0.0.1&body=http%3A%2F%2F127.0.0.1%2F`,
         );
       },
     );
@@ -267,7 +256,7 @@ describe('Phishing Detection', function () {
     await withFixtures(
       {
         fixtures: new FixtureBuilder().build(),
-        ganacheOptions,
+        ganacheOptions: defaultGanacheOptions,
         title: this.test.fullTitle(),
         testSpecificMock: async (mockServer) => {
           return setupPhishingDetectionMocks(mockServer, {
@@ -276,11 +265,12 @@ describe('Phishing Detection', function () {
           });
         },
         dapp: true,
-        dappPaths: ['mock-page-with-disallowed-iframe'],
+        dappPaths: [
+          './tests/phishing-controller/mock-page-with-disallowed-iframe',
+        ],
         dappOptions: {
           numberOfDapps: 2,
         },
-        failOnConsoleError: false,
       },
       async ({ driver }) => {
         await unlockWallet(driver);

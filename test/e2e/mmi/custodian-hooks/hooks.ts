@@ -142,7 +142,9 @@ export class CustodianTestClient implements ICustodianTestClient {
           signedTransactionTime as string,
         );
         if (!transaction) {
-          throw Error('Tx not found');
+          throw Error(
+            '🥲 Tx not found -> getEIP721TransactionStatusCreatedByTimestamp. Retrying...',
+          );
         }
         break;
       } catch (error) {
@@ -152,7 +154,9 @@ export class CustodianTestClient implements ICustodianTestClient {
           console.log(`Retrying in ${retryInterval / 1000} seconds...`);
           await new Promise((resolve) => setTimeout(resolve, retryInterval));
         } else {
-          throw error;
+          throw error(
+            `👎 Max retries (${maxRetries}) reached. Saturn tx not found.`,
+          );
         }
       }
     }
@@ -194,7 +198,9 @@ export class CustodianTestClient implements ICustodianTestClient {
         );
         return id;
       } catch (e) {
-        console.error(e);
+        console.error(
+          '🥲 Tx not found -> getEIP721TransactionStatusCreated. Retrying...',
+        );
       }
       retries += 1;
       if (retries < maxRetries) {
@@ -254,7 +260,7 @@ export class CustodianTestClient implements ICustodianTestClient {
         const diffTime = transactions.map((tx: { createdAt: string }) =>
           Math.abs(
             new Date(tx.createdAt).getTime() -
-              parseInt(signedTransactionTime, 10),
+            parseInt(signedTransactionTime, 10),
           ),
         );
         const min = Math.min(...diffTime);
@@ -339,5 +345,22 @@ export class CustodianTestClient implements ICustodianTestClient {
 
   async rejectPersonalSignatureId(txId: string): Promise<string | RegExp> {
     return txId;
+  }
+
+  public async postConnectionRequest(data: any) {
+    return (await axios
+      .post("https://neptune-custody.dev.metamask-institutional.io/qrcode/connection-request", data, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      })
+      .then(function (response) {
+        expect(response.status).toBe(200);
+        return response.data;
+      })
+      .catch(function (error) {
+        console.log(error.response.data);
+        throw error;
+      })) as string;
   }
 }

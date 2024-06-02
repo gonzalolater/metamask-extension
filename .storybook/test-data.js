@@ -2,7 +2,11 @@ import { draftTransactionInitialState } from '../ui/ducks/send';
 import { KeyringType } from '../shared/constants/keyring';
 import { NetworkType } from '@metamask/controller-utils';
 import { NetworkStatus } from '@metamask/network-controller';
+import { EthAccountType, EthMethod } from '@metamask/keyring-api';
 import { CHAIN_IDS } from '../shared/constants/network';
+import { copyable, divider, heading, panel, text } from '@metamask/snaps-sdk';
+import { getJsxElementFromComponent } from '@metamask/snaps-utils';
+import { FirstTimeFlowType } from '../shared/constants/onboarding';
 
 const state = {
   invalidCustomNetwork: {
@@ -24,11 +28,11 @@ const state = {
       22: {
         id: 22,
         date: null,
-        image: {
-          src: 'images/global-menu-block-explorer.svg',
-        },
       },
     },
+    orderedNetworkList: [],
+    pinnedAccountList: [],
+    hiddenAccountList: [],
     tokenList: {
       '0x514910771af9ca656af840dff83e8264ecf986ca': {
         address: '0x514910771af9ca656af840dff83e8264ecf986ca',
@@ -111,7 +115,7 @@ const state = {
         address: '0x6b175474e89094c44da98b954eedeac495271d0f',
         symbol: 'ETH',
         decimals: 18,
-        image: './images/eth_logo.png',
+        image: './images/eth_logo.svg',
         unlisted: false,
       },
       '0xB8c77482e45F1F44dE1745F52C74426C631bDD52': {
@@ -276,6 +280,19 @@ const state = {
         ],
       },
     },
+    interfaces: {
+      'test-interface': {
+        content: getJsxElementFromComponent(panel([
+          heading('Foo bar'),
+          text('Description'),
+          divider(),
+          text('More text'),
+          copyable('Text you can copy'),
+        ])),
+        state: {},
+        snapId: 'local:http://localhost:8080/',
+      },
+    },
     accountArray: [
       {
         name: 'This is a Really Long Account Name',
@@ -295,6 +312,76 @@ const state = {
     isUnlocked: true,
     isAccountMenuOpen: false,
     rpcUrl: 'https://rawtestrpc.metamask.io/',
+    internalAccounts: {
+      accounts: {
+        'cf8dace4-9439-4bd4-b3a8-88c821c8fcb3': {
+          address: '0x64a845a5b02460acf8a3d84503b0d68d028b4bb4',
+          id: 'cf8dace4-9439-4bd4-b3a8-88c821c8fcb3',
+          metadata: {
+            name: 'This is a Really Long Account Name',
+            keyring: {
+              type: 'HD Key Tree',
+            },
+          },
+          options: {},
+          methods: [...Object.values(EthMethod)],
+          type: EthAccountType.Eoa,
+        },
+        '07c2cfec-36c9-46c4-8115-3836d3ac9047': {
+          address: '0xb19ac54efa18cc3a14a5b821bfec73d284bf0c5e',
+          id: '07c2cfec-36c9-46c4-8115-3836d3ac9047',
+          metadata: {
+            name: 'Account 2',
+            keyring: {
+              type: 'HD Key Tree',
+            },
+          },
+          options: {},
+          methods: [...Object.values(EthMethod)],
+          type: EthAccountType.Eoa,
+        },
+        '15e69915-2a1a-4019-93b3-916e11fd432f': {
+          address: '0x9d0ba4ddac06032527b140912ec808ab9451b788',
+          id: '15e69915-2a1a-4019-93b3-916e11fd432f',
+          metadata: {
+            name: 'Account 3',
+            keyring: {
+              type: 'HD Key Tree',
+            },
+          },
+          options: {},
+          methods: [...Object.values(EthMethod)],
+          type: EthAccountType.Eoa,
+        },
+        '784225f4-d30b-4e77-a900-c8bbce735b88': {
+          address: '0xeb9e64b93097bc15f01f13eae97015c57ab64823',
+          id: '784225f4-d30b-4e77-a900-c8bbce735b88',
+          metadata: {
+            name: 'Account 4',
+            keyring: {
+              type: 'HD Key Tree',
+            },
+          },
+          options: {},
+          methods: [...Object.values(EthMethod)],
+          type: EthAccountType.Eoa,
+        },
+        'b990b846-b384-4508-93d9-587461f1123e': {
+          address: '0x71C7656EC7ab88b098defB751B7401B5f6d8976F',
+          id: 'b990b846-b384-4508-93d9-587461f1123e',
+          metadata: {
+            name: 'Test Account 1',
+            keyring: {
+              type: 'Test Keyring',
+            },
+          },
+          options: {},
+          methods: [...Object.values(EthMethod)],
+          type: EthAccountType.Eoa,
+        },
+      },
+      selectedAccount: 'cf8dace4-9439-4bd4-b3a8-88c821c8fcb3',
+    },
     identities: {
       '0x64a845a5b02460acf8a3d84503b0d68d028b4bb4': {
         name: 'This is a Really Long Account Name',
@@ -396,8 +483,59 @@ const state = {
       },
     ],
     allDetectedTokens: {
-      '0x5': {
+      '0xaa36a7': {
         '0x9d0ba4ddac06032527b140912ec808ab9451b788': [
+          {
+            address: '0x514910771AF9Ca656af840dff83E8264EcF986CA',
+            decimals: 18,
+            symbol: 'LINK',
+            image:
+              'https://crypto.com/price/coin-data/icon/LINK/color_icon.png',
+            aggregators: [
+              'coinGecko',
+              'oneInch',
+              'paraswap',
+              'zapper',
+              'zerion',
+            ],
+          },
+          {
+            address: '0xc00e94Cb662C3520282E6f5717214004A7f26888',
+            decimals: 18,
+            symbol: 'COMP',
+            image:
+              'https://crypto.com/price/coin-data/icon/COMP/color_icon.png',
+            aggregators: [
+              'bancor',
+              'cmc',
+              'cryptocom',
+              'coinGecko',
+              'oneInch',
+              'paraswap',
+              'pmm',
+              'zapper',
+              'zerion',
+              'zeroEx',
+            ],
+          },
+          {
+            address: '0xfffffffFf15AbF397dA76f1dcc1A1604F45126DB',
+            decimals: 18,
+            symbol: 'FSW',
+            image:
+              'https://assets.coingecko.com/coins/images/12256/thumb/falconswap.png?1598534184',
+            aggregators: [
+              'aave',
+              'cmc',
+              'coinGecko',
+              'oneInch',
+              'paraswap',
+              'zapper',
+              'zerion',
+            ],
+          },
+        ],
+        '0x64a845a5b02460acf8a3d84503b0d68d028b4bb4': [
           {
             address: '0x514910771AF9Ca656af840dff83E8264EcF986CA',
             decimals: 18,
@@ -529,7 +667,7 @@ const state = {
       [CHAIN_IDS.OPTIMISM_TESTNET]: false,
       [CHAIN_IDS.AVALANCHE_TESTNET]: true,
     },
-    firstTimeFlowType: 'create',
+    firstTimeFlowType: FirstTimeFlowType.create,
     completedOnboarding: true,
     knownMethodData: {
       '0x60806040': {
@@ -545,11 +683,11 @@ const state = {
     swapsWelcomeMessageHasBeenShown: true,
     defaultHomeActiveTabName: 'Tokens',
     providerConfig: {
-      type: 'goerli',
+      type: 'sepolia',
       ticker: 'ETH',
-      nickname: '',
+      nickname: 'Sepolia',
       rpcUrl: '',
-      chainId: '0x5',
+      chainId: '0xaa36a7',
     },
     network: '5',
     accounts: {
@@ -566,7 +704,33 @@ const state = {
         balance: '0x15f6f0b9d4f8d000',
       },
     },
+    accountsByChainId: {
+      '0x1': {
+        '0x64a845a5b02460acf8a3d84503b0d68d028b4bb4': { balance: '0x0' },
+        '0xb19ac54efa18cc3a14a5b821bfec73d284bf0c5e': {
+          balance: '0xcaf5317161f400',
+        },
+        '0x9d0ba4ddac06032527b140912ec808ab9451b788': { balance: '0x0' },
+      },
+      '0x5': {
+        '0x64a845a5b02460acf8a3d84503b0d68d028b4bb4': {
+          address: '0x64a845a5b02460acf8a3d84503b0d68d028b4bb4',
+          balance: '0x176e5b6f173ebe66',
+        },
+        '0xb19ac54efa18cc3a14a5b821bfec73d284bf0c5e': {
+          address: '0xb19ac54efa18cc3a14a5b821bfec73d284bf0c5e',
+          balance: '0x2d3142f5000',
+        },
+        '0x9d0ba4ddac06032527b140912ec808ab9451b788': {
+          address: '0x9d0ba4ddac06032527b140912ec808ab9451b788',
+          balance: '0x15f6f0b9d4f8d000',
+        },
+      },
+    },
     currentBlockGasLimit: '0x793af4',
+    currentBlockGasLimitByChainId: {
+      '0x5': '0x793af4',
+    },
     transactions: [
       {
         chainId: '0x38',
@@ -618,7 +782,7 @@ const state = {
               path: '/txParams/nonce',
               timestamp: 1629582711220,
               value: '0x15b',
-            }
+            },
           ],
           [
             {
@@ -1017,23 +1181,6 @@ const state = {
         v: '0x93',
       },
     ],
-    cachedBalances: {
-      1: {
-        '0x64a845a5b02460acf8a3d84503b0d68d028b4bb4': '0x0',
-        '0xb19ac54efa18cc3a14a5b821bfec73d284bf0c5e': '0xcaf5317161f400',
-        '0x9d0ba4ddac06032527b140912ec808ab9451b788': '0x0',
-      },
-      3: {
-        '0x64a845a5b02460acf8a3d84503b0d68d028b4bb4': '0x18d289d450bace66',
-        '0xb19ac54efa18cc3a14a5b821bfec73d284bf0c5e': '0x2d3142f5000',
-        '0x9d0ba4ddac06032527b140912ec808ab9451b788': '0x15f6f0b9d4f8d000',
-      },
-      5: {
-        '0x64a845a5b02460acf8a3d84503b0d68d028b4bb4': '0x176e5b6f173ebe66',
-        '0xb19ac54efa18cc3a14a5b821bfec73d284bf0c5e': '0x2d3142f5000',
-        '0x9d0ba4ddac06032527b140912ec808ab9451b788': '0x15f6f0b9d4f8d000',
-      },
-    },
     unapprovedMsgs: {},
     unapprovedMsgCount: 0,
     unapprovedPersonalMsgs: {},
@@ -1128,11 +1275,11 @@ const state = {
       '0xc2377d11fec1c3b7dd88c4854240ee5e3ed0d9f63b00456d98d80320337b827f',
     currentCurrency: 'usd',
     currencyRates: {
-      "ETH": {
+      ETH: {
         conversionDate: 1620710825.03,
         conversionRate: 3910.28,
         usdConversionRate: 3910.28,
-      }
+      },
     },
     ticker: 'ETH',
     alertEnabledness: {

@@ -1,4 +1,5 @@
 import { head, last } from 'lodash';
+import { EthAccountType, EthMethod } from '@metamask/keyring-api';
 import {
   TransactionStatus,
   TransactionType,
@@ -85,7 +86,24 @@ const getStateTree = ({
       chainId: CHAIN_IDS.MAINNET,
     },
     unapprovedMsgs,
-    selectedAddress: SENDERS.ONE,
+    internalAccounts: {
+      accounts: {
+        'cf8dace4-9439-4bd4-b3a8-88c821c8fcb3': {
+          address: SENDERS.ONE,
+          id: 'cf8dace4-9439-4bd4-b3a8-88c821c8fcb3',
+          metadata: {
+            name: 'Test Account',
+            keyring: {
+              type: 'HD Key Tree',
+            },
+          },
+          options: {},
+          methods: [...Object.values(EthMethod)],
+          type: EthAccountType.Eoa,
+        },
+      },
+      selectedAccount: 'cf8dace4-9439-4bd4-b3a8-88c821c8fcb3',
+    },
     featureFlags: {},
     transactions: [...incomingTxList, ...txList],
     incomingTransactionsPreferences: {},

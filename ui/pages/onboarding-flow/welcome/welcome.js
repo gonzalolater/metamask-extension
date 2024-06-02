@@ -2,9 +2,9 @@ import EventEmitter from 'events';
 import React, { useState, useEffect, useContext } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useHistory } from 'react-router-dom';
-///: BEGIN:ONLY_INCLUDE_IN(build-main,build-beta,build-flask)
+///: BEGIN:ONLY_INCLUDE_IF(build-main,build-beta,build-flask)
 import { Carousel } from 'react-responsive-carousel';
-///: END:ONLY_INCLUDE_IN
+///: END:ONLY_INCLUDE_IF
 import Mascot from '../../../components/ui/mascot';
 import Button from '../../../components/ui/button';
 import { Text } from '../../../components/component-library';
@@ -25,23 +25,23 @@ import {
 import {
   setFirstTimeFlowType,
   setTermsOfUseLastAgreed,
-  ///: BEGIN:ONLY_INCLUDE_IN(build-mmi)
+  ///: BEGIN:ONLY_INCLUDE_IF(build-mmi)
   setParticipateInMetaMetrics,
-  ///: END:ONLY_INCLUDE_IN
+  ///: END:ONLY_INCLUDE_IF
 } from '../../../store/actions';
 import {
-  ///: BEGIN:ONLY_INCLUDE_IN(build-main,build-beta,build-flask)
+  ///: BEGIN:ONLY_INCLUDE_IF(build-main,build-beta,build-flask)
   ONBOARDING_METAMETRICS,
-  ///: END:ONLY_INCLUDE_IN
+  ///: END:ONLY_INCLUDE_IF
   ONBOARDING_SECURE_YOUR_WALLET_ROUTE,
   ONBOARDING_COMPLETION_ROUTE,
-  ///: BEGIN:ONLY_INCLUDE_IN(build-mmi)
+  ///: BEGIN:ONLY_INCLUDE_IF(build-mmi)
   ONBOARDING_CREATE_PASSWORD_ROUTE,
   ONBOARDING_IMPORT_WITH_SRP_ROUTE,
-  ///: END:ONLY_INCLUDE_IN
+  ///: END:ONLY_INCLUDE_IF
 } from '../../../helpers/constants/routes';
-import { FIRST_TIME_FLOW_TYPES } from '../../../helpers/constants/onboarding';
 import { getFirstTimeFlowType, getCurrentKeyring } from '../../../selectors';
+import { FirstTimeFlowType } from '../../../../shared/constants/onboarding';
 
 export default function OnboardingWelcome() {
   const t = useI18nContext();
@@ -56,7 +56,10 @@ export default function OnboardingWelcome() {
   // have already imported or created a wallet
   useEffect(() => {
     if (currentKeyring) {
-      if (firstTimeFlowType === FIRST_TIME_FLOW_TYPES.IMPORT) {
+      if (firstTimeFlowType === FirstTimeFlowType.import) {
+        history.replace(ONBOARDING_COMPLETION_ROUTE);
+      }
+      if (firstTimeFlowType === FirstTimeFlowType.restore) {
         history.replace(ONBOARDING_COMPLETION_ROUTE);
       } else {
         history.replace(ONBOARDING_SECURE_YOUR_WALLET_ROUTE);
@@ -66,7 +69,7 @@ export default function OnboardingWelcome() {
   const trackEvent = useContext(MetaMetricsContext);
 
   const onCreateClick = async () => {
-    dispatch(setFirstTimeFlowType('create'));
+    dispatch(setFirstTimeFlowType(FirstTimeFlowType.create));
     trackEvent({
       category: MetaMetricsEventCategory.Onboarding,
       event: MetaMetricsEventName.OnboardingWalletCreationStarted,
@@ -76,14 +79,14 @@ export default function OnboardingWelcome() {
     });
     dispatch(setTermsOfUseLastAgreed(new Date().getTime()));
 
-    ///: BEGIN:ONLY_INCLUDE_IN(build-main,build-beta,build-flask)
+    ///: BEGIN:ONLY_INCLUDE_IF(build-main,build-beta,build-flask)
     history.push(ONBOARDING_METAMETRICS);
-    ///: END:ONLY_INCLUDE_IN
+    ///: END:ONLY_INCLUDE_IF
 
-    ///: BEGIN:ONLY_INCLUDE_IN(build-mmi)
+    ///: BEGIN:ONLY_INCLUDE_IF(build-mmi)
     await dispatch(setParticipateInMetaMetrics(false));
     history.push(ONBOARDING_CREATE_PASSWORD_ROUTE);
-    ///: END:ONLY_INCLUDE_IN
+    ///: END:ONLY_INCLUDE_IF
   };
   const toggleTermsCheck = () => {
     setTermsChecked((currentTermsChecked) => !currentTermsChecked);
@@ -101,7 +104,7 @@ export default function OnboardingWelcome() {
   ]);
 
   const onImportClick = async () => {
-    dispatch(setFirstTimeFlowType('import'));
+    dispatch(setFirstTimeFlowType(FirstTimeFlowType.import));
     trackEvent({
       category: MetaMetricsEventCategory.Onboarding,
       event: MetaMetricsEventName.OnboardingWalletImportStarted,
@@ -111,20 +114,20 @@ export default function OnboardingWelcome() {
     });
     dispatch(setTermsOfUseLastAgreed(new Date().getTime()));
 
-    ///: BEGIN:ONLY_INCLUDE_IN(build-main,build-beta,build-flask)
+    ///: BEGIN:ONLY_INCLUDE_IF(build-main,build-beta,build-flask)
     history.push(ONBOARDING_METAMETRICS);
-    ///: END:ONLY_INCLUDE_IN
+    ///: END:ONLY_INCLUDE_IF
 
-    ///: BEGIN:ONLY_INCLUDE_IN(build-mmi)
+    ///: BEGIN:ONLY_INCLUDE_IF(build-mmi)
     await dispatch(setParticipateInMetaMetrics(false));
     history.push(ONBOARDING_IMPORT_WITH_SRP_ROUTE);
-    ///: END:ONLY_INCLUDE_IN
+    ///: END:ONLY_INCLUDE_IF
   };
 
   return (
     <div className="onboarding-welcome" data-testid="onboarding-welcome">
       {
-        ///: BEGIN:ONLY_INCLUDE_IN(build-main,build-beta,build-flask)
+        ///: BEGIN:ONLY_INCLUDE_IF(build-main,build-beta,build-flask)
         <Carousel showThumbs={false} showStatus={false} showArrows>
           <div>
             <Text
@@ -189,11 +192,11 @@ export default function OnboardingWelcome() {
             </div>
           </div>
         </Carousel>
-        ///: END:ONLY_INCLUDE_IN
+        ///: END:ONLY_INCLUDE_IF
       }
 
       {
-        ///: BEGIN:ONLY_INCLUDE_IN(build-mmi)
+        ///: BEGIN:ONLY_INCLUDE_IF(build-mmi)
         <div>
           <Text
             variant={TextVariant.headingLg}
@@ -218,7 +221,7 @@ export default function OnboardingWelcome() {
             />
           </div>
         </div>
-        ///: END:ONLY_INCLUDE_IN
+        ///: END:ONLY_INCLUDE_IF
       }
 
       <ul className="onboarding-welcome__buttons">
@@ -253,14 +256,14 @@ export default function OnboardingWelcome() {
             disabled={!termsChecked}
           >
             {
-              ///: BEGIN:ONLY_INCLUDE_IN(build-main,build-beta,build-flask)
+              ///: BEGIN:ONLY_INCLUDE_IF(build-main,build-beta,build-flask)
               t('onboardingCreateWallet')
-              ///: END:ONLY_INCLUDE_IN
+              ///: END:ONLY_INCLUDE_IF
             }
             {
-              ///: BEGIN:ONLY_INCLUDE_IN(build-mmi)
+              ///: BEGIN:ONLY_INCLUDE_IF(build-mmi)
               t('continue')
-              ///: END:ONLY_INCLUDE_IN
+              ///: END:ONLY_INCLUDE_IF
             }
           </Button>
         </li>

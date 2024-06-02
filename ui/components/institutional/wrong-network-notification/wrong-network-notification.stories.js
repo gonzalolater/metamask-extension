@@ -13,22 +13,15 @@ const customData = {
       type: 'test',
       chainId: toHex(3),
     },
-    cachedBalances: {
+    accountsByChainId: {
       [toHex(3)]: {
-        '0x5Ab19e7091dD208F352F8E727B6DCC6F8aBB6275': '0x0',
+        '0x5Ab19e7091dD208F352F8E727B6DCC6F8aBB6275': { balance: '0x0' },
       },
     },
-    selectedAddress: '0x5Ab19e7091dD208F352F8E727B6DCC6F8aBB6275',
     custodianSupportedChains: {
       '0x5Ab19e7091dD208F352F8E727B6DCC6F8aBB6275': {
         supportedChains: ['1', '2'],
         custodianName: 'saturn',
-      },
-    },
-    identities: {
-      '0x5Ab19e7091dD208F352F8E727B6DCC6F8aBB6275': {
-        name: 'Custody Account A',
-        address: '0x5Ab19e7091dD208F352F8E727B6DCC6F8aBB6275',
       },
     },
     keyrings: [

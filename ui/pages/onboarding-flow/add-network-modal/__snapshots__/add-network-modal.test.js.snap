@@ -60,6 +60,7 @@ exports[`Add Network Modal should render 1`] = `
           </div>
           <input
             class="form-field__input"
+            data-testid="network-form-network-name"
             type="text"
             value=""
           />
@@ -90,6 +91,7 @@ exports[`Add Network Modal should render 1`] = `
           </div>
           <input
             class="form-field__input"
+            data-testid="network-form-rpc-url"
             type="text"
             value=""
           />
@@ -144,6 +146,7 @@ exports[`Add Network Modal should render 1`] = `
           </div>
           <input
             class="form-field__input"
+            data-testid="network-form-chain-id"
             type="text"
             value=""
           />
@@ -161,7 +164,7 @@ exports[`Add Network Modal should render 1`] = `
           Currency symbol
         </label>
         <div
-          class="box mm-text-field mm-text-field--size-md mm-text-field--truncate mm-form-text-field__text-field box--display-inline-flex box--flex-direction-row box--align-items-center box--background-color-background-default box--rounded-sm box--border-width-1 box--border-style-solid"
+          class="mm-box mm-text-field mm-text-field--size-md mm-text-field--truncate mm-form-text-field__text-field mm-box--padding-right-0 mm-box--padding-left-0 mm-box--display-inline-flex mm-box--align-items-center mm-box--background-color-background-default mm-box--rounded-sm mm-box--border-width-1 box--border-style-solid"
         >
           <input
             autocomplete="off"
@@ -171,6 +174,16 @@ exports[`Add Network Modal should render 1`] = `
             type="text"
             value=""
           />
+        </div>
+        <div
+          class="mm-box mm-text mm-help-text mm-form-text-field__help-text mm-text--body-xs mm-box--margin-top-1 mm-box--color-text-default"
+        >
+          <span
+            class="mm-box mm-text mm-text--body-sm mm-box--color-text-default"
+            data-testid="network-form-ticker-suggestion"
+          >
+            Suggested ticker symbol:
+          </span>
         </div>
       </div>
       <div
@@ -201,6 +214,7 @@ exports[`Add Network Modal should render 1`] = `
           </div>
           <input
             class="form-field__input"
+            data-testid="network-form-block-explorer-url"
             type="text"
             value=""
           />

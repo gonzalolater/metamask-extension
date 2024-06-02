@@ -16,9 +16,13 @@ import { setupLocale } from '../shared/lib/error-utils';
 import * as actions from './store/actions';
 import configureStore from './store/store';
 import {
+  getOriginOfCurrentTab,
   getPermittedAccountsForCurrentTab,
-  getSelectedAddress,
+  getSelectedInternalAccount,
   getUnapprovedTransactions,
+  getNetworkToAutomaticallySwitchTo,
+  getSwitchedNetworkDetails,
+  getUseRequestQueue,
 } from './selectors';
 import { ALERT_STATE } from './ducks/alerts';
 import {
@@ -55,7 +59,7 @@ export const updateBackgroundConnection = (backgroundConnection) => {
 
 export default function launchMetamaskUi(opts, cb) {
   const { backgroundConnection } = opts;
-  ///: BEGIN:ONLY_INCLUDE_IN(desktop)
+  ///: BEGIN:ONLY_INCLUDE_IF(desktop)
   let desktopEnabled = false;
 
   backgroundConnection.getDesktopEnabled(function (err, result) {
@@ -65,7 +69,7 @@ export default function launchMetamaskUi(opts, cb) {
 
     desktopEnabled = result;
   });
-  ///: END:ONLY_INCLUDE_IN
+  ///: END:ONLY_INCLUDE_IF
 
   // check if we are unlocked first
   backgroundConnection.getState(function (err, metamaskState) {
@@ -74,9 +78,9 @@ export default function launchMetamaskUi(opts, cb) {
         err,
         {
           ...metamaskState,
-          ///: BEGIN:ONLY_INCLUDE_IN(desktop)
+          ///: BEGIN:ONLY_INCLUDE_IF(desktop)
           desktopEnabled,
-          ///: END:ONLY_INCLUDE_IN
+          ///: END:ONLY_INCLUDE_IF
         },
         backgroundConnection,
       );
@@ -87,9 +91,9 @@ export default function launchMetamaskUi(opts, cb) {
       cb(
         null,
         store,
-        ///: BEGIN:ONLY_INCLUDE_IN(desktop)
+        ///: BEGIN:ONLY_INCLUDE_IF(desktop)
         backgroundConnection,
-        ///: END:ONLY_INCLUDE_IN
+        ///: END:ONLY_INCLUDE_IF
       );
     });
   });
@@ -106,7 +110,7 @@ async function startApp(metamaskState, backgroundConnection, opts) {
   );
 
   if (metamaskState.textDirection === 'rtl') {
-    await switchDirection('rtl');
+    switchDirection('rtl');
   }
 
   const draftInitialState = {
@@ -131,7 +135,8 @@ async function startApp(metamaskState, backgroundConnection, opts) {
     const { origin } = draftInitialState.activeTab;
     const permittedAccountsForCurrentTab =
       getPermittedAccountsForCurrentTab(draftInitialState);
-    const selectedAddress = getSelectedAddress(draftInitialState);
+    const selectedAddress =
+      getSelectedInternalAccount(draftInitialState)?.address ?? '';
     const unconnectedAccountAlertShownOrigins =
       getUnconnectedAccountAlertShown(draftInitialState);
     const unconnectedAccountAlertIsEnabled =
@@ -164,6 +169,7 @@ async function startApp(metamaskState, backgroundConnection, opts) {
     metamaskState.unapprovedDecryptMsgs,
     metamaskState.unapprovedEncryptionPublicKeyMsgs,
     metamaskState.unapprovedTypedMessages,
+    metamaskState.networkId,
     metamaskState.providerConfig.chainId,
   );
   const numberOfUnapprovedTx = unapprovedTxsAll.length;
@@ -187,6 +193,38 @@ async function startApp(metamaskState, backgroundConnection, opts) {
       store.dispatch(actions.setFeatureFlag(key, value));
     },
   };
+
+  // This block autoswitches chains based on the last chain used
+  // for a given dapp, when there are no pending confimrations
+  // This allows the user to be connected on one chain
+  // for one dapp, and automatically change for another
+  const state = store.getState();
+  const networkIdToSwitchTo = getNetworkToAutomaticallySwitchTo(state);
+  if (networkIdToSwitchTo) {
+    await store.dispatch(
+      actions.automaticallySwitchNetwork(
+        networkIdToSwitchTo,
+        getOriginOfCurrentTab(state),
+      ),
+    );
+  } else if (getSwitchedNetworkDetails(state)) {
+    // It's possible that old details could exist if the user
+    // opened the toast but then didn't close it
+    // Clear out any existing switchedNetworkDetails
+    // if the user didn't just change the dapp network
+    await store.dispatch(actions.clearSwitchedNetworkDetails());
+  }
+
+  // Register this window as the current popup
+  // and set in background state
+  if (
+    getUseRequestQueue(state) &&
+    getEnvironmentType() === ENVIRONMENT_TYPE_POPUP
+  ) {
+    const thisPopupId = Date.now();
+    global.metamask.id = thisPopupId;
+    await store.dispatch(actions.setCurrentExtensionPopupId(thisPopupId));
+  }
 
   // start app
   render(<Root store={store} />, opts.container);

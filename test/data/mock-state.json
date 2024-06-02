@@ -2,9 +2,18 @@
   "DNS": {
     "resolution": null
   },
+  "activeTab": {
+    "id": 113,
+    "title": "E2E Test Dapp",
+    "origin": "https://metamask.github.io",
+    "protocol": "https:",
+    "url": "https://metamask.github.io/test-dapp/"
+  },
   "appState": {
     "networkDropdownOpen": false,
-    "importNftsModal": { "open": false },
+    "importNftsModal": {
+      "open": false
+    },
     "gasIsLoading": false,
     "isLoading": false,
     "modal": {
@@ -20,6 +29,11 @@
     "warning": null,
     "customTokenAmount": "10"
   },
+  "confirm": {},
+  "confirmAlerts": {
+    "alerts": [],
+    "confirmed": []
+  },
   "confirmTransaction": {
     "txData": {
       "txParams": {
@@ -31,6 +45,9 @@
   "history": {
     "mostRecentOverviewPage": "/mostRecentOverviewPage"
   },
+  "localeMessages": {
+    "currentLocale": "en"
+  },
   "metamask": {
     "use4ByteResolution": true,
     "ipfsGateway": "dweb.link",
@@ -40,6 +57,39 @@
     "participateInMetaMetrics": false,
     "gasEstimateType": "fee-market",
     "showBetaHeader": false,
+    "gasFeeEstimatesByChainId": {
+      "0x5": {
+        "gasEstimateType": "fee-market",
+        "gasFeeEstimates": {
+          "low": {
+            "minWaitTimeEstimate": 180000,
+            "maxWaitTimeEstimate": 300000,
+            "suggestedMaxPriorityFeePerGas": "3",
+            "suggestedMaxFeePerGas": "53"
+          },
+          "medium": {
+            "minWaitTimeEstimate": 15000,
+            "maxWaitTimeEstimate": 60000,
+            "suggestedMaxPriorityFeePerGas": "7",
+            "suggestedMaxFeePerGas": "70"
+          },
+          "high": {
+            "minWaitTimeEstimate": 0,
+            "maxWaitTimeEstimate": 15000,
+            "suggestedMaxPriorityFeePerGas": "10",
+            "suggestedMaxFeePerGas": "100"
+          },
+          "estimatedBaseFee": "50",
+          "historicalBaseFeeRange": ["28.533098435", "70.351148354"],
+          "baseFeeTrend": "up",
+          "latestPriorityFeeRange": ["1", "40"],
+          "historicalPriorityFeeRange": ["0.1458417", "700.156384646"],
+          "priorityFeeTrend": "down",
+          "networkCongestion": 0.90625
+        }
+      }
+    },
+    "permissionHistory": {},
     "gasFeeEstimates": {
       "low": {
         "minWaitTimeEstimate": 180000,
@@ -102,13 +152,226 @@
             "version": "5.1.2"
           }
         ]
+      },
+      "npm:@metamask/test-snap-bip32": {
+        "id": "npm:@metamask/test-snap-bip32",
+        "origin": "npm:@metamask/test-snap-bip32",
+        "version": "5.1.2",
+        "iconUrl": null,
+        "initialPermissions": {
+          "endowment:ethereum-provider": {}
+        },
+        "manifest": {
+          "description": "An example Snap that signs messages using BLS.",
+          "proposedName": "BIP-32 Test Snap",
+          "repository": {
+            "type": "git",
+            "url": "https://github.com/MetaMask/test-snaps.git"
+          },
+          "source": {
+            "location": {
+              "npm": {
+                "filePath": "dist/bundle.js",
+                "packageName": "@metamask/test-snap-bip32",
+                "registry": "https://registry.npmjs.org"
+              }
+            },
+            "shasum": "L1k+dT9Q+y3KfIqzaH09MpDZVPS9ZowEh9w01ZMTWMU="
+          },
+          "version": "5.1.2"
+        },
+        "versionHistory": [
+          {
+            "date": 1680686075921,
+            "origin": "https://metamask.github.io",
+            "version": "5.1.2"
+          }
+        ]
+      },
+      "npm:@metamask/test-snap-getEntropy": {
+        "id": "npm:@metamask/test-snap-getEntropy",
+        "origin": "npm:@metamask/test-snap-getEntropy",
+        "version": "5.1.2",
+        "iconUrl": null,
+        "initialPermissions": {
+          "endowment:ethereum-provider": {}
+        },
+        "manifest": {
+          "description": "An example Snap that can derive snap specific entropy.",
+          "proposedName": "Get Entropy Test Snap",
+          "repository": {
+            "type": "git",
+            "url": "https://github.com/MetaMask/test-snaps.git"
+          },
+          "source": {
+            "location": {
+              "npm": {
+                "filePath": "dist/bundle.js",
+                "packageName": "@metamask/test-snap-getEntropy",
+                "registry": "https://registry.npmjs.org"
+              }
+            },
+            "shasum": "L1k+dT9Q+y3KfIqzaH09MpDZVPS9ZowEh9w01ZMTWMU="
+          },
+          "version": "5.1.2"
+        },
+        "versionHistory": [
+          {
+            "date": 1680686075921,
+            "origin": "https://metamask.github.io",
+            "version": "5.1.2"
+          }
+        ]
+      },
+      "npm:@metamask/test-snap-networkAccess": {
+        "id": "npm:@metamask/test-snap-networkAccess",
+        "origin": "npm:@metamask/test-snap-networkAccess",
+        "version": "5.1.2",
+        "iconUrl": null,
+        "initialPermissions": {
+          "endowment:ethereum-provider": {}
+        },
+        "manifest": {
+          "description": "An example Snap that has network access.",
+          "proposedName": "Network Access Test Snap",
+          "repository": {
+            "type": "git",
+            "url": "https://github.com/MetaMask/test-snaps.git"
+          },
+          "source": {
+            "location": {
+              "npm": {
+                "filePath": "dist/bundle.js",
+                "packageName": "@metamask/test-snap-networkAccess",
+                "registry": "https://registry.npmjs.org"
+              }
+            },
+            "shasum": "L1k+dT9Q+y3KfIqzaH09MpDZVPS9ZowEh9w01ZMTWMU="
+          },
+          "version": "5.1.2"
+        },
+        "versionHistory": [
+          {
+            "date": 1680686075921,
+            "origin": "https://metamask.github.io",
+            "version": "5.1.2"
+          }
+        ]
+      },
+      "npm:@metamask/test-snap-wasm": {
+        "id": "npm:@metamask/test-snap-wasm",
+        "origin": "npm:@metamask/test-snap-wasm",
+        "version": "5.1.2",
+        "iconUrl": null,
+        "initialPermissions": {
+          "endowment:ethereum-provider": {}
+        },
+        "manifest": {
+          "description": "An example Snap that has WASM access.",
+          "proposedName": "WASM Test Snap",
+          "repository": {
+            "type": "git",
+            "url": "https://github.com/MetaMask/test-snaps.git"
+          },
+          "source": {
+            "location": {
+              "npm": {
+                "filePath": "dist/bundle.js",
+                "packageName": "@metamask/test-snap-wasm",
+                "registry": "https://registry.npmjs.org"
+              }
+            },
+            "shasum": "L1k+dT9Q+y3KfIqzaH09MpDZVPS9ZowEh9w01ZMTWMU="
+          },
+          "version": "5.1.2"
+        },
+        "versionHistory": [
+          {
+            "date": 1680686075921,
+            "origin": "https://metamask.github.io",
+            "version": "5.1.2"
+          }
+        ]
+      },
+      "npm:@metamask/test-snap-notify": {
+        "id": "npm:@metamask/test-snap-notify",
+        "origin": "npm:@metamask/test-snap-notify",
+        "version": "5.1.2",
+        "iconUrl": null,
+        "initialPermissions": {
+          "endowment:ethereum-provider": {}
+        },
+        "manifest": {
+          "description": "An example Snap that can send notifications.",
+          "proposedName": "Notification Test Snap",
+          "repository": {
+            "type": "git",
+            "url": "https://github.com/MetaMask/test-snaps.git"
+          },
+          "source": {
+            "location": {
+              "npm": {
+                "filePath": "dist/bundle.js",
+                "packageName": "@metamask/test-snap-notify",
+                "registry": "https://registry.npmjs.org"
+              }
+            },
+            "shasum": "L1k+dT9Q+y3KfIqzaH09MpDZVPS9ZowEh9w01ZMTWMU="
+          },
+          "version": "5.1.2"
+        },
+        "versionHistory": [
+          {
+            "date": 1680686075921,
+            "origin": "https://metamask.github.io",
+            "version": "5.1.2"
+          }
+        ]
+      },
+      "npm:@metamask/test-snap-dialog": {
+        "id": "npm:@metamask/test-snap-dialog",
+        "origin": "npm:@metamask/test-snap-dialog",
+        "version": "5.1.2",
+        "iconUrl": null,
+        "initialPermissions": {
+          "endowment:ethereum-provider": {}
+        },
+        "manifest": {
+          "description": "An example Snap that can send dialog prompts.",
+          "proposedName": "Dialog Test Snap",
+          "repository": {
+            "type": "git",
+            "url": "https://github.com/MetaMask/test-snaps.git"
+          },
+          "source": {
+            "location": {
+              "npm": {
+                "filePath": "dist/bundle.js",
+                "packageName": "@metamask/test-snap-dialog",
+                "registry": "https://registry.npmjs.org"
+              }
+            },
+            "shasum": "L1k+dT9Q+y3KfIqzaH09MpDZVPS9ZowEh9w01ZMTWMU="
+          },
+          "version": "5.1.2"
+        },
+        "versionHistory": [
+          {
+            "date": 1680686075921,
+            "origin": "https://metamask.github.io",
+            "version": "5.1.2"
+          }
+        ]
       }
     },
     "preferences": {
       "hideZeroBalanceTokens": false,
+      "showExtensionInFullSizeView": false,
       "showFiatInTestnets": false,
       "showTestNetworks": true,
-      "useNativeCurrencyAsPrimaryCurrency": true
+      "smartTransactionsOptInStatus": false,
+      "useNativeCurrencyAsPrimaryCurrency": true,
+      "petnamesEnabled": false
     },
     "ensResolutionsByAddress": {},
     "isAccountMenuOpen": false,
@@ -139,6 +402,135 @@
         "nickname": "Chain 5",
         "id": "chain5"
       }
+    },
+    "internalAccounts": {
+      "accounts": {
+        "cf8dace4-9439-4bd4-b3a8-88c821c8fcb3": {
+          "address": "0x0dcd5d886577d5081b0c52e242ef29e70be3e7bc",
+          "id": "cf8dace4-9439-4bd4-b3a8-88c821c8fcb3",
+          "metadata": {
+            "name": "Test Account",
+            "keyring": {
+              "type": "HD Key Tree"
+            }
+          },
+          "options": {},
+          "methods": [
+            "personal_sign",
+            "eth_sign",
+            "eth_signTransaction",
+            "eth_signTypedData_v1",
+            "eth_signTypedData_v3",
+            "eth_signTypedData_v4"
+          ],
+          "type": "eip155:eoa"
+        },
+        "07c2cfec-36c9-46c4-8115-3836d3ac9047": {
+          "address": "0xec1adf982415d2ef5ec55899b9bfb8bc0f29251b",
+          "id": "07c2cfec-36c9-46c4-8115-3836d3ac9047",
+          "metadata": {
+            "name": "Test Account 2",
+            "keyring": {
+              "type": "HD Key Tree"
+            }
+          },
+          "options": {},
+          "methods": [
+            "personal_sign",
+            "eth_sign",
+            "eth_signTransaction",
+            "eth_signTypedData_v1",
+            "eth_signTypedData_v3",
+            "eth_signTypedData_v4"
+          ],
+          "type": "eip155:eoa"
+        },
+        "15e69915-2a1a-4019-93b3-916e11fd432f": {
+          "address": "0xc42edfcc21ed14dda456aa0756c153f7985d8813",
+          "id": "15e69915-2a1a-4019-93b3-916e11fd432f",
+          "metadata": {
+            "name": "Ledger Hardware 2",
+            "keyring": {
+              "type": "Ledger Hardware"
+            }
+          },
+          "options": {},
+          "methods": [
+            "personal_sign",
+            "eth_sign",
+            "eth_signTransaction",
+            "eth_signTypedData_v1",
+            "eth_signTypedData_v3",
+            "eth_signTypedData_v4"
+          ],
+          "type": "eip155:eoa"
+        },
+        "784225f4-d30b-4e77-a900-c8bbce735b88": {
+          "address": "0xeb9e64b93097bc15f01f13eae97015c57ab64823",
+          "id": "784225f4-d30b-4e77-a900-c8bbce735b88",
+          "metadata": {
+            "name": "Test Account 3",
+            "keyring": {
+              "type": "HD Key Tree"
+            }
+          },
+          "options": {},
+          "methods": [
+            "personal_sign",
+            "eth_sign",
+            "eth_signTransaction",
+            "eth_signTypedData_v1",
+            "eth_signTypedData_v3",
+            "eth_signTypedData_v4"
+          ],
+          "type": "eip155:eoa"
+        },
+        "694225f4-d30b-4e77-a900-c8bbce735b42": {
+          "address": "0xca8f1F0245530118D0cf14a06b01Daf8f76Cf281",
+          "id": "694225f4-d30b-4e77-a900-c8bbce735b42",
+          "metadata": {
+            "name": "Test Account 4",
+            "keyring": {
+              "type": "Custody test"
+            }
+          },
+          "options": {},
+          "methods": [
+            "personal_sign",
+            "eth_sign",
+            "eth_signTransaction",
+            "eth_signTypedData_v1",
+            "eth_signTypedData_v3",
+            "eth_signTypedData_v4"
+          ],
+          "type": "eip155:eoa"
+        },
+        "c3deeb99-ba0d-4a4e-a0aa-033fc1f79ae3": {
+          "address": "0xb552685e3d2790efd64a175b00d51f02cdafee5d",
+          "id": "c3deeb99-ba0d-4a4e-a0aa-033fc1f79ae3",
+          "metadata": {
+            "name": "Snap Account 1",
+            "keyring": {
+              "type": "Snap Keyring"
+            },
+            "snap": {
+              "id": "snap-id",
+              "name": "snap-name"
+            }
+          },
+          "options": {},
+          "methods": [
+            "personal_sign",
+            "eth_sign",
+            "eth_signTransaction",
+            "eth_signTypedData_v1",
+            "eth_signTypedData_v3",
+            "eth_signTypedData_v4"
+          ],
+          "type": "eip155:eoa"
+        }
+      },
+      "selectedAccount": "cf8dace4-9439-4bd4-b3a8-88c821c8fcb3"
     },
     "keyrings": [
       {
@@ -190,7 +582,9 @@
     "selectedNetworkClientId": "goerli",
     "networksMetadata": {
       "goerli": {
-        "EIPS": { "1559": true },
+        "EIPS": {
+          "1559": true
+        },
         "status": "available"
       }
     },
@@ -212,7 +606,7 @@
         "snapDescription": "A simple private key is a randomly generated string of characters that is used to sign transactions. This private key is stored securely within this snap.",
         "tags": ["EOA"],
         "developer": "Metamask",
-        "website": "https://www.consensys.net/",
+        "website": "https://www.consensys.io/",
         "auditUrls": ["auditUrl1", "auditUrl2"],
         "version": "1.0.0",
         "lastUpdated": "April 20, 2023"
@@ -234,7 +628,13 @@
         "message": "Hello, http://localhost:8086!"
       }
     },
-    "cachedBalances": {},
+    "accountsByChainId": {
+      "0x5": {
+        "0x0dcd5d886577d5081b0c52e242ef29e70be3e7bc": {
+          "balance": "0x15f6f0b9d4f8d000"
+        }
+      }
+    },
     "incomingTransactionsPreferences": {
       "0x1": true,
       "0xe708": false,
@@ -260,6 +660,14 @@
       "0xeb9e64b93097bc15f01f13eae97015c57ab64823": {
         "address": "0xeb9e64b93097bc15f01f13eae97015c57ab64823",
         "balance": "0x0"
+      },
+      "0xca8f1F0245530118D0cf14a06b01Daf8f76Cf281": {
+        "address": "0xca8f1F0245530118D0cf14a06b01Daf8f76Cf281",
+        "balance": "0x0"
+      },
+      "0xb552685e3d2790efd64a175b00d51f02cdafee5d": {
+        "address": "0xb552685e3d2790efd64a175b00d51f02cdafee5d",
+        "balance": "0x0"
       }
     },
     "tokens": [
@@ -281,7 +689,9 @@
     ],
     "contractExchangeRates": {
       "0x108cf70c7d384c552f42c07c41c0e1e46d77ea0d": 0.00039345803819379796,
-      "0xd8f6a2ffb0fc5952d16c9768b71cfd35b6399aa5": 0.00008189274407698049
+      "0xd8f6a2ffb0fc5952d16c9768b71cfd35b6399aa5": 0.00008189274407698049,
+      "0x2260fac5e5542a773aa44fbcfedf7c193bc2c599": 0.0017123,
+      "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48": 0.0000000018
     },
     "ticker": "ETH",
     "currentCurrency": "usd",
@@ -315,6 +725,9 @@
     "useCurrencyRateCheck": true,
     "useNftDetection": true,
     "openSeaEnabled": true,
+    "orderedNetworkList": [],
+    "pinnedAccountList": [],
+    "hiddenAccountList": [],
     "advancedGasFee": {
       "0x5": {
         "maxBaseFee": "75",
@@ -1404,8 +1817,12 @@
         "time": 1528133319641,
         "origin": "metamask",
         "type": "transaction",
-        "requestData": { "txId": "testTransactionId" },
-        "requestState": { "test": "value" }
+        "requestData": {
+          "txId": "testTransactionId"
+        },
+        "requestState": {
+          "test": "value"
+        }
       }
     },
     "pendingApprovalCount": 1,
@@ -1444,6 +1861,15 @@
             "6.0.0": {
               "checksum": "31k+dT9Q+y3KfIqzaH09MpDZVPS9ZowEh9w01ZMTWMU="
             }
+          }
+        }
+      }
+    },
+    "permissionHistory": {
+      "https://metamask.github.io": {
+        "eth_accounts": {
+          "accounts": {
+            "0dcd5d886577d5081b0c52e242ef29e70be3e7bc": 1709225290848
           }
         }
       }

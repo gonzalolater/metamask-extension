@@ -14,7 +14,7 @@ import {
   OriginalRequest,
 } from '@metamask/message-manager/dist/AbstractMessageManager';
 import {
-  BaseControllerV2,
+  BaseController,
   RestrictedControllerMessenger,
 } from '@metamask/base-controller';
 import {
@@ -117,23 +117,31 @@ export type DecryptMessageControllerMessenger = RestrictedControllerMessenger<
 >;
 
 export type DecryptMessageControllerOptions = {
+  // TODO: Replace `any` with type
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   getState: () => any;
   messenger: DecryptMessageControllerMessenger;
+  // TODO: Replace `any` with type
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   metricsEvent: (payload: any, options?: any) => void;
 };
 
 /**
  * Controller for decrypt signing requests requiring user approval.
  */
-export default class DecryptMessageController extends BaseControllerV2<
+export default class DecryptMessageController extends BaseController<
   typeof controllerName,
   DecryptMessageControllerState,
   DecryptMessageControllerMessenger
 > {
   hub: EventEmitter;
 
+  // TODO: Replace `any` with type
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private _getState: () => any;
 
+  // TODO: Replace `any` with type
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private _metricsEvent: (payload: any, options?: any) => void;
 
   private _decryptMessageManager: DecryptMessageManager;
@@ -363,6 +371,8 @@ export default class DecryptMessageController extends BaseControllerV2<
   ) {
     messageManager.subscribe((state: MessageManagerState<AbstractMessage>) => {
       const newMessages = this._migrateMessages(
+        // TODO: Replace `any` with type
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         state.unapprovedMessages as any,
       );
       this.update((draftState) => {

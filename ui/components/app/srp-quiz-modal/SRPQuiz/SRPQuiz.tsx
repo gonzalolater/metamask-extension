@@ -24,10 +24,10 @@ import {
   IconName,
   IconSize,
   Modal,
-  ModalContent,
-  ModalHeader,
   ModalOverlay,
 } from '../../../component-library';
+import { ModalContent } from '../../../component-library/modal-content/deprecated';
+import { ModalHeader } from '../../../component-library/modal-header/deprecated';
 import QuizContent from '../QuizContent';
 import { JSXDict, QuizStage } from '../types';
 
@@ -57,6 +57,8 @@ const openSupportArticle = (): void => {
   });
 };
 
+// TODO: Replace `any` with type
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export default function SRPQuiz(props: any) {
   const [stage, setStage] = useState<QuizStage>(QuizStage.introduction);
 

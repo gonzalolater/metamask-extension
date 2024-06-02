@@ -9,25 +9,25 @@ import {
 } from '../../../helpers/constants/design-system';
 import {
   Modal,
-  ModalContent,
-  ModalHeader,
   ModalOverlay,
   Box,
   ButtonPrimary,
 } from '../../../components/component-library';
+import { ModalContent } from '../../../components/component-library/modal-content/deprecated';
+import { ModalHeader } from '../../../components/component-library/modal-header/deprecated';
 import {
   SLIPPAGE_HIGH_ERROR,
   SLIPPAGE_LOW_ERROR,
 } from '../../../../shared/constants/swaps';
 import SwapsBannerAlert from '../swaps-banner-alert/swaps-banner-alert';
 
-interface Props {
+type Props = {
   isOpen: boolean;
   slippageErrorKey: string;
   setSlippageNotificationModalOpened: (isOpen: boolean) => void;
   onSwapSubmit: (opts: { acknowledgedSlippage: boolean }) => void;
   currentSlippage: number;
-}
+};
 
 export default function SlippageNotificationModal({
   isOpen,

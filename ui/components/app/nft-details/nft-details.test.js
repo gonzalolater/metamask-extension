@@ -49,9 +49,11 @@ jest.mock('../../../store/actions.ts', () => ({
 
 describe('NFT Details', () => {
   const mockStore = configureMockStore([thunk])(mockState);
-
-  const nfts =
-    mockState.metamask.allNfts[mockState.metamask.selectedAddress][toHex(5)];
+  const selectedAddress =
+    mockState.metamask.internalAccounts.accounts[
+      mockState.metamask.internalAccounts.selectedAccount
+    ].address;
+  const nfts = mockState.metamask.allNfts[selectedAddress][toHex(5)];
 
   const props = {
     nft: nfts[5],
@@ -83,7 +85,7 @@ describe('NFT Details', () => {
     expect(mockHistoryPush).toHaveBeenCalledWith(DEFAULT_ROUTE);
   });
 
-  it(`should call removeAndIgnoreNFT with proper nft details and route to '/' when removing nft`, () => {
+  it(`should call removeAndIgnoreNFT with proper nft details and route to '/' when removing nft`, async () => {
     const { queryByTestId } = renderWithProvider(
       <NftDetails {...props} />,
       mockStore,
@@ -95,11 +97,34 @@ describe('NFT Details', () => {
     const removeNftButton = queryByTestId('nft-item-remove');
     fireEvent.click(removeNftButton);
 
-    expect(removeAndIgnoreNft).toHaveBeenCalledWith(
+    await expect(removeAndIgnoreNft).toHaveBeenCalledWith(
       nfts[5].address,
       nfts[5].tokenId,
     );
     expect(setRemoveNftMessage).toHaveBeenCalledWith('success');
+    expect(mockHistoryPush).toHaveBeenCalledWith(DEFAULT_ROUTE);
+  });
+
+  it(`should call setRemoveNftMessage with error when removeAndIgnoreNft fails and route to '/'`, async () => {
+    const { queryByTestId } = renderWithProvider(
+      <NftDetails {...props} />,
+      mockStore,
+    );
+    removeAndIgnoreNft.mockImplementation(() => {
+      throw new Error('Error');
+    });
+
+    const openOptionMenuButton = queryByTestId('nft-options__button');
+    fireEvent.click(openOptionMenuButton);
+
+    const removeNftButton = queryByTestId('nft-item-remove');
+    fireEvent.click(removeNftButton);
+
+    await expect(removeAndIgnoreNft).toHaveBeenCalledWith(
+      nfts[5].address,
+      nfts[5].tokenId,
+    );
+    expect(setRemoveNftMessage).toHaveBeenCalledWith('error');
     expect(mockHistoryPush).toHaveBeenCalledWith(DEFAULT_ROUTE);
   });
 
@@ -147,6 +172,20 @@ describe('NFT Details', () => {
 
     const nftSendButton = queryByTestId('nft-send-button');
     expect(nftSendButton).not.toBeInTheDocument();
+  });
+
+  it('should render send button if it is an ERC1155', () => {
+    const nftProps = {
+      nft: nfts[1],
+    };
+    const { queryByTestId } = renderWithProvider(
+      <NftDetails {...nftProps} />,
+      mockStore,
+    );
+
+    const nftSendButton = queryByTestId('nft-send-button');
+
+    expect(nftSendButton).not.toBeDisabled();
   });
 
   describe(`Alternative Networks' OpenSea Links`, () => {

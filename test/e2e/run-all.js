@@ -8,10 +8,7 @@ const { exitWithError } = require('../../development/lib/exit-with-error');
 const { loadBuildTypesConfig } = require('../../development/lib/build-type');
 
 // These tests should only be run on Flask for now.
-const FLASK_ONLY_TESTS = [
-  'petnames.spec.js',
-  'test-snap-txinsights-v2.spec.js',
-];
+const FLASK_ONLY_TESTS = ['test-snap-namelookup.spec.js'];
 
 const getTestPathsForTestDir = async (testDir) => {
   const testFilenames = await fs.promises.readdir(testDir, {
@@ -79,7 +76,7 @@ async function main() {
             choices: ['chrome', 'firefox'],
           })
           .option('debug', {
-            default: process.env.E2E_DEBUG === 'true',
+            default: true,
             description:
               'Run tests in debug mode, logging each driver interaction',
             type: 'boolean',
@@ -90,6 +87,10 @@ async function main() {
           })
           .option('rpc', {
             description: `run json-rpc specific e2e tests`,
+            type: 'boolean',
+          })
+          .option('multi-provider', {
+            description: `run multi injected provider e2e tests`,
             type: 'boolean',
           })
           .option('build-type', {
@@ -127,6 +128,7 @@ async function main() {
     buildType,
     updateSnapshot,
     updatePrivacySnapshot,
+    multiProvider,
   } = argv;
 
   let testPaths;
@@ -148,12 +150,24 @@ async function main() {
   } else if (rpc) {
     const testDir = path.join(__dirname, 'json-rpc');
     testPaths = await getTestPathsForTestDir(testDir);
+  } else if (multiProvider) {
+    // Copy dist/ to folder
+    fs.cp(
+      path.resolve('dist/chrome'),
+      path.resolve('dist/chrome2'),
+      { recursive: true },
+      (err) => {
+        if (err) {
+          throw err;
+        }
+      },
+    );
+
+    const testDir = path.join(__dirname, 'multi-injected-provider');
+    testPaths = await getTestPathsForTestDir(testDir);
   } else if (buildType === 'mmi') {
     const testDir = path.join(__dirname, 'tests');
-    testPaths = [
-      ...(await getTestPathsForTestDir(testDir)),
-      path.join(__dirname, 'metamask-ui.spec.js'),
-    ];
+    testPaths = [...(await getTestPathsForTestDir(testDir))];
   } else {
     const testDir = path.join(__dirname, 'tests');
     const filteredFlaskAndMainTests = featureTestsOnMain.filter((p) =>
@@ -162,7 +176,6 @@ async function main() {
     testPaths = [
       ...(await getTestPathsForTestDir(testDir)),
       ...filteredFlaskAndMainTests,
-      path.join(__dirname, 'metamask-ui.spec.js'),
     ];
   }
 
@@ -175,8 +188,8 @@ async function main() {
   if (retries) {
     args.push('--retries', retries);
   }
-  if (debug) {
-    args.push('--debug');
+  if (!debug) {
+    args.push('--debug=false');
   }
   if (updateSnapshot) {
     args.push('--update-snapshot');
